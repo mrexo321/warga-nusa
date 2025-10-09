@@ -41,7 +41,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/shift-kehadiran" element={<ShiftKehadiran />} />
         <Route path="/course-satpam" element={<SecurityCourses />} />
-        <Route path="/course-satpam/detail" element={<DetailCourse />} />
+        <Route path="/course-satpam/detail/:id" element={<DetailCourse />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

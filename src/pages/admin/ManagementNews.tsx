@@ -1,37 +1,129 @@
 import React, { useState } from "react";
 import MainLayout from "../../layouts/MainLayout";
-import { Plus, Edit3, Trash2, Search, CalendarDays, User } from "lucide-react";
+import { Plus, Edit3, Trash2, Search, X } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { newsService } from "../../services/newsService";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+
+// === Dummy Author (UUID) ===
+const dummyAuthors = [
+  { id: "0199c1f8-6983-7b43-a499-017f50bb3540", name: "Andi Pratama" },
+  { id: "0199c1f8-b740-72ad-80cc-3e020bec6440", name: "Siti Rahmawati" },
+  { id: "0199c1f8-ec8b-7b32-bb2f-0592246bd790", name: "Budi Santoso" },
+];
+
+// === Validation Schema ===
+const newsSchema = z.object({
+  title: z.string().min(3, "Judul minimal 3 karakter"),
+  content: z.string().min(10, "Konten minimal 10 karakter"),
+  thumbnail: z.any().optional(),
+  author_id: z.string().uuid("Penulis tidak valid"),
+});
+
+type NewsFormValues = z.infer<typeof newsSchema>;
 
 const ManagementNews = () => {
   const [search, setSearch] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingNews, setEditingNews] = useState<any>(null);
 
-  const newsList = [
-    {
-      id: 1,
-      title: "Pelatihan Keamanan Tahap II Resmi Dibuka",
-      author: "Admin",
-      date: "02 Oktober 2025",
-      status: "Dipublikasikan",
-    },
-    {
-      id: 2,
-      title: "Simulasi Tanggap Darurat di Kantor Pusat",
-      author: "Budi Santoso",
-      date: "28 September 2025",
-      status: "Draft",
-    },
-    {
-      id: 3,
-      title: "Kegiatan Sosialisasi Peraturan Baru",
-      author: "Rizal Hakim",
-      date: "25 September 2025",
-      status: "Dipublikasikan",
-    },
-  ];
+  // === Fetch Data ===
+  const {
+    data: newsList,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["news"],
+    queryFn: newsService.getAll,
+  });
 
-  const filteredNews = newsList.filter((n) =>
+  const filteredNews = (newsList ?? []).filter((n: any) =>
     n.title.toLowerCase().includes(search.toLowerCase())
   );
+
+  // === Mutations ===
+  const addMutation = useMutation({
+    mutationFn: (formData: FormData) => newsService.create(formData),
+    onSuccess: () => {
+      toast.success("Berita berhasil ditambahkan");
+      refetch();
+      setIsModalOpen(false);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data: { id: string; formData: FormData }) =>
+      newsService.update(data.id, data.formData),
+    onSuccess: () => {
+      toast.success("Berita berhasil diperbarui");
+      refetch();
+      setIsModalOpen(false);
+      setEditingNews(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => newsService.delete(id),
+    onSuccess: () => {
+      toast.success("Berita berhasil dihapus");
+      refetch();
+    },
+  });
+
+  // === Form ===
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<NewsFormValues>({
+    resolver: zodResolver(newsSchema),
+    defaultValues: {
+      author_id: dummyAuthors[0].id,
+    },
+  });
+
+  const onSubmit = (values: NewsFormValues) => {
+    const formData = new FormData();
+    formData.append("title", values.title);
+    formData.append("content", values.content);
+    formData.append("author_id", values.author_id);
+
+    if (values.thumbnail?.[0]) {
+      formData.append("thumbnail", values.thumbnail[0]);
+    }
+
+    if (editingNews) {
+      updateMutation.mutate({ id: editingNews.id, formData });
+    } else {
+      addMutation.mutate(formData);
+    }
+  };
+
+  const openAddModal = () => {
+    reset({ author_id: dummyAuthors[0].id });
+    setEditingNews(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (news: any) => {
+    reset({
+      title: news.title,
+      content: news.content,
+      author_id: news.author_id ?? dummyAuthors[0].id,
+    });
+    setEditingNews(news);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Yakin ingin menghapus berita ini?")) {
+      deleteMutation.mutate(id);
+    }
+  };
 
   return (
     <MainLayout>
@@ -39,23 +131,25 @@ const ManagementNews = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
           <h1 className="text-2xl font-bold">Manajemen Berita</h1>
-
-          <button className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-200">
+          <button
+            onClick={openAddModal}
+            className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-200"
+          >
             <Plus size={18} />
             <span>Tambah Berita</span>
           </button>
         </div>
 
         {/* Search */}
-        <div className="relative">
+        <div className="relative w-full sm:w-1/3">
           <Search
-            size={18}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            size={18}
           />
           <input
             type="text"
             placeholder="Cari berita..."
-            className="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-10 pr-3 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -67,56 +161,73 @@ const ManagementNews = () => {
             <thead>
               <tr className="bg-slate-800/70 text-slate-200 uppercase text-xs tracking-wider">
                 <th className="px-6 py-3 text-left">Judul</th>
+                <th className="px-6 py-3 text-left">Konten</th>
                 <th className="px-6 py-3 text-left">Penulis</th>
-                <th className="px-6 py-3 text-left">Tanggal</th>
-                <th className="px-6 py-3 text-left">Status</th>
+                <th className="px-6 py-3 text-left">Thumbnail</th>
                 <th className="px-6 py-3 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {filteredNews.length > 0 ? (
-                filteredNews.map((news) => (
-                  <tr
-                    key={news.id}
-                    className="border-t border-slate-700/50 hover:bg-slate-800/40 transition-colors"
+              {isLoading ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="py-6 text-center text-slate-400 italic"
                   >
-                    <td className="px-6 py-3 font-medium">{news.title}</td>
-                    <td className="px-6 py-3">
-                      <div className="flex items-center space-x-2">
-                        <User size={14} className="text-cyan-400" />
-                        <span>{news.author}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-3 flex items-center space-x-2">
-                      <CalendarDays size={14} className="text-amber-400" />
-                      <span>{news.date}</span>
-                    </td>
-                    <td className="px-6 py-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          news.status === "Dipublikasikan"
-                            ? "bg-green-500/20 text-green-400"
-                            : "bg-slate-500/20 text-slate-300"
-                        }`}
-                      >
-                        {news.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 text-center space-x-2">
-                      <button className="p-2 rounded-lg bg-slate-700/50 hover:bg-cyan-500/20 transition">
-                        <Edit3 size={16} className="text-cyan-400" />
-                      </button>
-                      <button className="p-2 rounded-lg bg-slate-700/50 hover:bg-red-500/20 transition">
-                        <Trash2 size={16} className="text-red-400" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                    Memuat data...
+                  </td>
+                </tr>
+              ) : filteredNews.length > 0 ? (
+                filteredNews.map((news: any) => {
+                  const authorName =
+                    dummyAuthors.find((a) => a.id === news.author_id)?.name ??
+                    "Tidak diketahui";
+
+                  return (
+                    <tr
+                      key={news.id}
+                      className="border-t border-slate-700/50 hover:bg-slate-800/40 transition-colors"
+                    >
+                      <td className="px-6 py-3 font-medium">{news.title}</td>
+                      <td className="px-6 py-3 truncate max-w-xs">
+                        {news.content.length > 80
+                          ? news.content.slice(0, 80) + "..."
+                          : news.content}
+                      </td>
+                      <td className="px-6 py-3">{authorName}</td>
+                      <td className="px-6 py-3">
+                        {news.thumbnail ? (
+                          <img
+                            src={`http://localhost:3000/${news.thumbnail}`}
+                            alt="Thumbnail"
+                            className="w-16 h-16 rounded object-cover border border-slate-700"
+                          />
+                        ) : (
+                          <span className="text-slate-500 italic">-</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3 text-center space-x-2">
+                        <button
+                          onClick={() => openEditModal(news)}
+                          className="p-2 rounded-lg bg-slate-700/50 hover:bg-cyan-500/20 transition"
+                        >
+                          <Edit3 size={16} className="text-cyan-400" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(news.id)}
+                          className="p-2 rounded-lg bg-slate-700/50 hover:bg-red-500/20 transition"
+                        >
+                          <Trash2 size={16} className="text-red-400" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-6 py-6 text-center text-slate-500 italic"
+                    className="py-6 text-center text-slate-500 italic"
                   >
                     Tidak ada berita ditemukan
                   </td>
@@ -125,6 +236,110 @@ const ManagementNews = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Modal Form */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black/60 w-full flex items-center justify-center z-50">
+            <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 w-full max-w-lg relative">
+              <button
+                className="absolute top-3 right-3 text-slate-400 hover:text-slate-200"
+                onClick={() => setIsModalOpen(false)}
+              >
+                <X size={20} />
+              </button>
+
+              <h2 className="text-xl font-semibold mb-4 text-amber-400">
+                {editingNews ? "Edit Berita" : "Tambah Berita"}
+              </h2>
+
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-4 text-slate-200"
+              >
+                {/* Judul */}
+                <div>
+                  <label className="block text-sm mb-1">Judul</label>
+                  <input
+                    type="text"
+                    {...register("title")}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 focus:ring-2 focus:ring-amber-500 outline-none"
+                  />
+                  {errors.title && (
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.title.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Konten */}
+                <div>
+                  <label className="block text-sm mb-1">Konten</label>
+                  <textarea
+                    {...register("content")}
+                    rows={5}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 focus:ring-2 focus:ring-amber-500 outline-none"
+                  />
+                  {errors.content && (
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.content.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Author */}
+                <div>
+                  <label className="block text-sm mb-1">Penulis</label>
+                  <select
+                    {...register("author_id")}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 focus:ring-2 focus:ring-amber-500 outline-none"
+                  >
+                    {dummyAuthors.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.author_id && (
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.author_id.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Thumbnail */}
+                <div>
+                  <label className="block text-sm mb-1">Thumbnail</label>
+                  {editingNews?.thumbnail && (
+                    <img
+                      src={`http://localhost:3000/${editingNews.thumbnail}`}
+                      alt="Thumbnail lama"
+                      className="w-20 h-20 object-cover mb-1 rounded"
+                    />
+                  )}
+                  <input
+                    type="file"
+                    {...register("thumbnail")}
+                    className="w-full text-sm"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={addMutation.isPending || updateMutation.isPending}
+                  className="w-full bg-amber-500 text-slate-900 font-semibold py-2 rounded-md hover:bg-amber-400 transition-all duration-200"
+                >
+                  {editingNews
+                    ? updateMutation.isPending
+                      ? "Menyimpan..."
+                      : "Simpan Perubahan"
+                    : addMutation.isPending
+                    ? "Menambahkan..."
+                    : "Tambah Berita"}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </MainLayout>
   );

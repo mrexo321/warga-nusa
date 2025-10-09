@@ -13,6 +13,9 @@ import {
   X,
 } from "lucide-react";
 import Webcam from "react-webcam";
+import { attendanceService } from "../../services/attendanceService";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 
 const ShiftKehadiran = () => {
   const user = useSelector((state: RootState) => state.user);
@@ -23,6 +26,26 @@ const ShiftKehadiran = () => {
   );
   const webcamRef = useRef<Webcam>(null);
 
+  // ✅ useMutation untuk absensi
+  const { mutate: markAttendance, isPending } = useMutation({
+    mutationFn: async (imageBase64: string) => {
+      // Convert Base64 → Blob → File
+      const blob = await fetch(imageBase64).then((res) => res.blob());
+      const file = new File([blob], "attendance.jpg", { type: "image/jpeg" });
+      return await attendanceService.markAttendance(file);
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "Absensi berhasil dikirim!");
+      setPhoto(null);
+      setLocation(null);
+    },
+    onError: (error: any) => {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Gagal mengirim absensi.");
+    },
+  });
+
+  // 🔹 Data Dummy
   const shifts = [
     { hari: "Senin", shift: "Pagi", jam: "07:00 - 15:00" },
     { hari: "Selasa", shift: "Siang", jam: "15:00 - 23:00" },
@@ -55,25 +78,31 @@ const ShiftKehadiran = () => {
     },
   ];
 
+  // 🔹 Ambil lokasi user
   const getLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) =>
           setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        (err) => alert("Gagal mengambil lokasi: " + err.message)
+        (err) => toast.error("Gagal mengambil lokasi: " + err.message)
       );
-    } else {
-      alert("Geolocation tidak didukung di browser ini.");
-    }
+    } else toast.error("Geolocation tidak didukung di browser ini.");
   };
 
+  // 🔹 Ambil foto dari webcam
   const capturePhoto = () => {
     const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
       setPhoto(imageSrc);
       setIsCameraOpen(false);
       getLocation();
-    }
+    } else toast.error("Gagal mengambil foto.");
+  };
+
+  // 🔹 Kirim absensi
+  const handleSubmitAttendance = () => {
+    if (!photo) return toast.error("Silakan ambil foto terlebih dahulu.");
+    markAttendance(photo);
   };
 
   return (
@@ -96,7 +125,6 @@ const ShiftKehadiran = () => {
             </div>
           </div>
 
-          {/* Tombol Absen */}
           <button
             onClick={() => setIsCameraOpen(true)}
             className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-xl shadow-lg flex items-center justify-center space-x-2 hover:scale-[1.03] transition-all duration-200 w-full md:w-auto"
@@ -115,7 +143,7 @@ const ShiftKehadiran = () => {
             {rekap.map((item) => (
               <div
                 key={item.label}
-                className={`rounded-2xl p-5 border border-slate-700/50 bg-slate-800/40 shadow-md flex items-center justify-between hover:scale-[1.02] transition-transform duration-200`}
+                className="rounded-2xl p-5 border border-slate-700/50 bg-slate-800/40 shadow-md flex items-center justify-between hover:scale-[1.02] transition-transform duration-200"
               >
                 <div>
                   <h4 className="text-slate-400 text-sm">{item.label}</h4>
@@ -154,9 +182,7 @@ const ShiftKehadiran = () => {
                       i % 2 === 0 ? "bg-slate-800/30" : "bg-slate-800/10"
                     } hover:bg-slate-700/30 transition`}
                   >
-                    <td className="px-4 py-3 text-slate-300 whitespace-nowrap">
-                      {s.hari}
-                    </td>
+                    <td className="px-4 py-3 text-slate-300">{s.hari}</td>
                     <td className="px-4 py-3 text-slate-300">{s.shift}</td>
                     <td className="px-4 py-3 text-slate-300">{s.jam}</td>
                     <td className="px-4 py-3 text-slate-300 flex space-x-3 items-center">
@@ -214,7 +240,7 @@ const ShiftKehadiran = () => {
               alt="Absen"
               className="w-32 h-32 sm:w-40 sm:h-40 object-cover rounded-lg border border-slate-600"
             />
-            <div className="text-slate-300 text-sm sm:text-base">
+            <div className="text-slate-300 text-sm sm:text-base flex-1">
               <p className="font-medium">Koordinat Lokasi:</p>
               {location ? (
                 <p className="mt-1">
@@ -224,6 +250,14 @@ const ShiftKehadiran = () => {
               ) : (
                 <p className="mt-1 text-slate-500">Lokasi belum diambil.</p>
               )}
+
+              <button
+                onClick={handleSubmitAttendance}
+                disabled={isPending}
+                className="mt-4 w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-medium disabled:bg-gray-500"
+              >
+                {isPending ? "Mengirim..." : "Kirim Absensi"}
+              </button>
             </div>
           </div>
         )}

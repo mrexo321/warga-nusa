@@ -1,32 +1,47 @@
 import React from "react";
+import { motion } from "framer-motion";
 import Section from "./Section";
 
-const ProgramCard = ({ title, description, icon, duration, level }) => {
+const ProgramCard = ({ title, description, icon, duration, level, index }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border-t-4 border-yellow-400">
-      <div className="flex justify-center mb-4">{icon}</div>
-      <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">
-        {title}
-      </h3>
-      <p className="text-gray-600 mb-4 text-center leading-relaxed">
-        {description}
-      </p>
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.6 }}
+      viewport={{ once: true }}
+      className="bg-gradient-to-b from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-200 relative overflow-hidden"
+    >
+      {/* Top Border Glow */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400"></div>
 
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span className="text-gray-500">Durasi:</span>
-          <span className="font-medium text-gray-700">{duration}</span>
+      <div className="p-6 flex flex-col items-center text-center">
+        <div className="mb-4 transform transition-transform duration-300 hover:scale-110">
+          {icon}
         </div>
-        <div className="flex justify-between">
-          <span className="text-gray-500">Level:</span>
-          <span className="font-medium text-gray-700">{level}</span>
+        <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
+        <p className="text-gray-600 mb-5 leading-relaxed">{description}</p>
+
+        <div className="w-full space-y-2 text-sm text-left">
+          <div className="flex justify-between">
+            <span className="text-gray-500">Durasi:</span>
+            <span className="font-medium text-gray-800">{duration}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Level:</span>
+            <span className="font-medium text-gray-800">{level}</span>
+          </div>
         </div>
+
+        {/* Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          className="relative w-full mt-6 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded-lg overflow-hidden group"
+        >
+          <span className="relative z-10">Daftar Sekarang</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-white to-yellow-300 opacity-0 group-hover:opacity-20 transition-opacity duration-500 animate-shine"></div>
+        </motion.button>
       </div>
-
-      <button className="w-full mt-4 bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 px-4 rounded transition-colors">
-        Daftar Sekarang
-      </button>
-    </div>
+    </motion.div>
   );
 };
 
@@ -167,28 +182,33 @@ const Programs = () => {
   ];
 
   return (
-    <Section id="programs">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+    <Section
+      id="programs"
+      className="bg-gradient-to-br from-slate-900 via-gray-900 to-black text-white py-20"
+    >
+      <div className="text-center mb-16">
+        <motion.h2
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-3xl md:text-4xl font-bold text-yellow-400 mb-4"
+        >
           Program Pelatihan
-        </h2>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="text-lg text-gray-300 max-w-2xl mx-auto"
+        >
           Pilih program pelatihan yang sesuai dengan kebutuhan dan level
           kemampuan Anda
-        </p>
+        </motion.p>
       </div>
 
-      {/* Programs Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
         {programs.map((program, index) => (
-          <ProgramCard
-            key={index}
-            title={program.title}
-            description={program.description}
-            duration={program.duration}
-            level={program.level}
-            icon={program.icon}
-          />
+          <ProgramCard key={index} index={index} {...program} />
         ))}
       </div>
     </Section>

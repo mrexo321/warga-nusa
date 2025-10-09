@@ -6,7 +6,7 @@ const MainLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="relative min-h-screen flex bg-gradient-to-br from-slate-900 via-blue-900 to-black overflow-hidden">
+    <div className="relative min-h-screen flex bg-gradient-to-br from-slate-900 via-blue-900 to-black overflow-x-auto">
       {/* Sidebar */}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
@@ -23,9 +23,9 @@ const MainLayout = ({ children }) => {
           <h1 className="text-white font-semibold text-lg">Dashboard</h1>
         </header>
 
-        {/* Isi halaman */}
-        <main className="flex-1 p-6 md:p-8 z-10 relative">
-          <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-2xl p-6">
+        {/* ✅ Hanya main yang bisa scroll horizontal */}
+        <main className="flex-1 p-6 md:p-8 z-10 relative overflow-x-auto">
+          <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-2xl p-6 w-full">
             {children}
           </div>
         </main>

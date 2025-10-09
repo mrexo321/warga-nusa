@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import Section from "./Section";
 import StatsCard from "./StatsCard";
 
@@ -84,45 +85,79 @@ const About = () => {
 
   return (
     <Section background="gray" id="about">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+      {/* Intro Section */}
+      <motion.div
+        className="text-center mb-16"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <h2 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-6">
           Tentang WargaNusa
         </h2>
-        <div className="max-w-4xl mx-auto text-lg text-gray-600 leading-relaxed">
-          <p className="mb-4">
-            Wajrasena Garda Nusantara (WargaNusa) adalah perusahaan terdepan
-            dalam bidang jasa keamanan dan pelatihan security di Indonesia.
-            Dengan pengalaman lebih dari 15 tahun, kami telah menjadi mitra
-            terpercaya untuk berbagai institusi dan perusahaan.
-          </p>
-          <p>
-            Komitmen kami adalah menghasilkan tenaga keamanan yang profesional,
-            handal, dan memiliki integritas tinggi melalui program pelatihan
-            berkualitas dengan standar internasional.
-          </p>
-        </div>
-      </div>
+        <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
+          <span className="font-semibold text-gray-900">
+            Wajrasena Garda Nusantara (WargaNusa)
+          </span>{" "}
+          adalah perusahaan terdepan dalam bidang jasa keamanan dan pelatihan
+          security di Indonesia. Dengan pengalaman lebih dari{" "}
+          <span className="text-yellow-500 font-bold">15 tahun</span>, kami
+          menjadi mitra terpercaya bagi institusi, pemerintahan, dan perusahaan
+          swasta.
+        </p>
+      </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+      <motion.div
+        className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
+      >
         {stats.map((stat, index) => (
-          <StatsCard
+          <motion.div
             key={index}
-            number={stat.number}
-            label={stat.label}
-            icon={stat.icon}
-          />
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 200 }}
+          >
+            <StatsCard
+              number={stat.number}
+              label={stat.label}
+              icon={stat.icon}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      {/* Training Image */}
-      <div className="text-center">
+      {/* Training Section */}
+      <motion.div
+        className="relative rounded-2xl overflow-hidden shadow-xl max-w-5xl mx-auto"
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.7 }}
+      >
         <img
-          src="https://images.unsplash.com/photo-1750068382387-3e4708c998a8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzd8MHwxfHNlYXJjaHwyfHxzZWN1cml0eSUyMHRyYWluaW5nfGVufDB8fHx8MTc1Nzc0ODA4MHww&ixlib=rb-4.1.0&q=85"
-          alt="Training"
-          className="w-full max-w-4xl mx-auto rounded-lg shadow-lg border-4 border-yellow-400"
+          src="https://images.unsplash.com/photo-1605902711622-cfb43c4437d7?auto=format&fit=crop&w=1600&q=80"
+          alt="Pelatihan Security"
+          className="w-full object-cover h-[450px] md:h-[550px]"
         />
-      </div>
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+
+        {/* Text Overlay */}
+        <div className="absolute bottom-0 left-0 p-8 md:p-12 text-left text-white">
+          <h3 className="text-3xl font-bold mb-2">
+            Pelatihan Security Profesional
+          </h3>
+          <p className="text-gray-200 text-lg max-w-lg">
+            Kami membekali peserta dengan keahlian dan kedisiplinan tinggi, siap
+            menghadapi tantangan keamanan di dunia nyata.
+          </p>
+          <button className="mt-5 px-6 py-3 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-400 transition">
+            Lihat Program Pelatihan
+          </button>
+        </div>
+      </motion.div>
     </Section>
   );
 };

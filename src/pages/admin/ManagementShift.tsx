@@ -5,7 +5,6 @@ import { Plus, Clock, Users, Edit, Trash2, Search } from "lucide-react";
 const ManagementShift = () => {
   const [search, setSearch] = useState("");
 
-  // Contoh data shift
   const shifts = [
     {
       id: 1,
@@ -65,9 +64,9 @@ const ManagementShift = () => {
           />
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-slate-300 border border-slate-700/50 rounded-lg overflow-hidden">
+        {/* ✅ Table yang bisa di-scroll horizontal */}
+        <div className="overflow-x-auto rounded-lg border border-slate-700/50">
+          <table className="w-[700px] md:w-full text-sm text-slate-300">
             <thead>
               <tr className="bg-slate-800/70 text-slate-200 uppercase text-xs tracking-wider">
                 <th className="px-6 py-3 text-left">Nama Shift</th>
@@ -83,22 +82,27 @@ const ManagementShift = () => {
                   key={shift.id}
                   className="border-t border-slate-700/50 hover:bg-slate-800/40 transition-colors"
                 >
-                  <td className="px-6 py-3 font-medium">{shift.name}</td>
-
-                  <td className="px-6 py-3 flex items-center space-x-2">
-                    <Clock size={14} className="text-amber-400" />
-                    <span>
-                      {shift.start} - {shift.end}
-                    </span>
+                  <td className="px-6 py-3 font-medium whitespace-nowrap">
+                    {shift.name}
                   </td>
-                  <td className="px-6 py-3 font-medium">
+
+                  <td className="px-6 py-3 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
-                      <Users size={14} className="text-cyan-400" />
-                      {shift.members}
+                      <Clock size={14} className="text-amber-400" />
+                      <span>
+                        {shift.start} - {shift.end}
+                      </span>
                     </div>
                   </td>
 
-                  <td className="px-6 py-3">
+                  <td className="px-6 py-3 whitespace-nowrap">
+                    <div className="flex items-center space-x-2">
+                      <Users size={14} className="text-cyan-400" />
+                      <span>{shift.members}</span>
+                    </div>
+                  </td>
+
+                  <td className="px-6 py-3 whitespace-nowrap">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
                         shift.status === "Aktif"
@@ -109,7 +113,8 @@ const ManagementShift = () => {
                       {shift.status}
                     </span>
                   </td>
-                  <td className="px-6 py-3 text-center space-x-2">
+
+                  <td className="px-6 py-3 text-center space-x-2 whitespace-nowrap">
                     <button className="p-2 rounded-lg bg-slate-700/50 hover:bg-cyan-500/20 transition">
                       <Edit size={16} className="text-cyan-400" />
                     </button>
@@ -119,6 +124,7 @@ const ManagementShift = () => {
                   </td>
                 </tr>
               ))}
+
               {filteredShifts.length === 0 && (
                 <tr>
                   <td
@@ -132,6 +138,11 @@ const ManagementShift = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Hint scroll */}
+        <p className="text-xs text-slate-500 text-center md:hidden mt-2">
+          Geser tabel ke kanan untuk melihat detail &raquo;
+        </p>
       </div>
     </MainLayout>
   );

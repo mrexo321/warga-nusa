@@ -1,27 +1,46 @@
 import React from "react";
+import { motion } from "framer-motion";
 import Section from "./Section";
 
-const NewsCard = ({ title, excerpt, date, image, category }) => {
+const NewsCard = ({ title, excerpt, date, image, category, index }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden border-t-4 border-yellow-400">
-      <img src={image} alt={title} className="w-full h-48 object-cover" />
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.6 }}
+      viewport={{ once: true }}
+      className="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group"
+    >
+      {/* Image Section */}
+      <div className="relative overflow-hidden h-52">
+        <img
+          src={image}
+          alt={title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      </div>
+
+      {/* Content Section */}
       <div className="p-6">
         <div className="flex items-center justify-between mb-3">
-          <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">
+          <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
             {category}
           </span>
           <span className="text-gray-500 text-sm">{date}</span>
         </div>
 
-        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors duration-300">
           {title}
         </h3>
-        <p className="text-gray-600 mb-4 line-clamp-3">{excerpt}</p>
+        <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+          {excerpt}
+        </p>
 
-        <button className="text-yellow-600 hover:text-yellow-700 font-medium transition-colors flex items-center">
+        <button className="text-yellow-600 hover:text-yellow-700 font-semibold transition-all flex items-center group">
           Baca Selengkapnya
           <svg
-            className="w-4 h-4 ml-1"
+            className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform duration-200"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -35,7 +54,7 @@ const NewsCard = ({ title, excerpt, date, image, category }) => {
           </svg>
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -80,35 +99,46 @@ const News = () => {
   ];
 
   return (
-    <Section background="yellow" id="news">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+    <Section
+      id="news"
+      className="bg-gradient-to-b from-yellow-50 via-white to-yellow-100 py-20"
+    >
+      <div className="text-center mb-14">
+        <motion.h2
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-3xl md:text-4xl font-bold text-gray-900 mb-3"
+        >
           Berita Terkini
-        </h2>
-        <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-          Update terbaru dan informasi penting dari WargaNusa
-        </p>
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="text-lg text-gray-700 max-w-2xl mx-auto"
+        >
+          Update terbaru dan informasi penting dari{" "}
+          <span className="font-semibold text-yellow-600">WargaNusa</span>
+        </motion.p>
       </div>
 
       {/* News Grid */}
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
         {newsItems.map((news, index) => (
-          <NewsCard
-            key={index}
-            title={news.title}
-            excerpt={news.excerpt}
-            date={news.date}
-            category={news.category}
-            image={news.image}
-          />
+          <NewsCard key={index} {...news} index={index} />
         ))}
       </div>
 
       {/* See All News Button */}
-      <div className="text-center mt-12">
-        <button className="bg-black hover:bg-gray-800 text-yellow-400 font-medium px-8 py-3 rounded-lg transition-colors">
-          Lihat Semua Berita
-        </button>
+      <div className="text-center mt-16">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          className="relative bg-black text-yellow-400 font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-lg overflow-hidden group transition-all"
+        >
+          <span className="relative z-10">Lihat Semua Berita</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-white to-yellow-400 opacity-0 group-hover:opacity-20 transition-opacity duration-700 animate-shine"></div>
+        </motion.button>
       </div>
     </Section>
   );

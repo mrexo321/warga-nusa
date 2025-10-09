@@ -3,44 +3,49 @@ import Button from "./Button";
 
 const Hero = () => {
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1750068382387-3e4708c998a8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzd8MHwxfHNlYXJjaHwyfHxzZWN1cml0eSUyMHRyYWluaW5nfGVufDB8fHx8MTc1Nzc0ODA4MHww&ixlib=rb-4.1.0&q=85')",
-        }}
-      >
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black bg-opacity-60"></div>
-      </div>
+    <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center bg-black overflow-hidden border-b border-yellow-400">
+      {/* Background pattern (opsional, biar elegan) */}
+      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[length:20px_20px]" />
 
-      {/* Content */}
-      <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-          Wajrasena Garda
-          <br />
-          <span className="text-yellow-400">Nusantara</span>
+      {/* Konten utama */}
+      <div className="relative z-10 px-6 max-w-3xl mx-auto">
+        <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-wide">
+          Wajrasena Garda Nusantara
         </h1>
-        <p className="text-lg md:text-xl lg:text-2xl text-gray-200 mb-10 leading-relaxed">
-          Pelatihan keamanan profesional dengan standar internasional.
+        <p className="text-gray-300 text-lg md:text-xl mb-8 leading-relaxed">
+          Media Pelatihan dan Pengembangan SDM Keamanan Berbasis Teknologi.
           <br />
-          Membangun SDM keamanan yang kompeten dan terpercaya.
+          Membangun profesionalisme dengan dedikasi dan disiplin tinggi.
         </p>
+
+        {/* Tombol CTA */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button variant="primary" size="lg" className="shadow-lg">
-            Lihat Pelatihan →
+          <Button variant="primary" size="lg" className="shadow-md">
+            Lihat Program
           </Button>
           <Button
             variant="outline"
             size="lg"
-            className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black shadow-lg"
+            className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black shadow-md"
           >
             Tentang Kami
           </Button>
         </div>
+
+        {/* Logo / Ikon di bawah teks */}
+        <div className="mt-12 flex justify-center">
+          <div className="bg-yellow-400/10 p-6 rounded-2xl border border-yellow-400/30">
+            <img
+              src="/logo1.png"
+              alt="Logo Wajrasena"
+              className="h-16 w-auto object-contain"
+            />
+          </div>
+        </div>
       </div>
+
+      {/* Efek dekoratif bawah */}
+      <div className="absolute bottom-0 left-0 right-0 h-[80px] bg-gradient-to-t from-black to-transparent" />
     </section>
   );
 };

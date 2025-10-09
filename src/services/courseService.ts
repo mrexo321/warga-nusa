@@ -1,3 +1,4 @@
+import axios from "axios";
 import axiosInstance from "../api/axiosInstance";
 
 export const courseService = {
@@ -37,6 +38,12 @@ export const courseService = {
   // Hapus kursus
   async delete(id: string | number) {
     const response = await axiosInstance.delete(`/course/${id}`);
+    return response.data;
+  },
+
+  async applyCourse(courseId: string) {
+    const response = await axiosInstance.post(`/course/apply/${courseId}`);
+
     return response.data;
   },
 };
