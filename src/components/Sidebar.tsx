@@ -20,6 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { path: "/dashboard", label: "Dashboard" },
     { path: "/users", label: "Manajemen Pengguna" },
     { path: "/shift", label: "Manajemen Shift" },
+    { path: "/shift-assignment", label: "Penugasan Shift" },
     { path: "/attendance", label: "Kehadiran" },
     { path: "/courses", label: "Manajemen Pelatihan" },
     { path: "/news", label: "Manajemen Berita" },

@@ -26,10 +26,29 @@ const materialSchema = z.object({
 
 type MaterialValues = z.infer<typeof materialSchema>;
 
-const meetingSchema = z.object({
-  title: z.string().min(3, "Judul wajib diisi"),
-  start_at: z.string().optional(),
-});
+// === SCHEMA MEETING ===
+const meetingSchema = z
+  .object({
+    title: z.string().min(3, "Judul wajib diisi"),
+    mode: z.enum(["offline", "online"], {
+      errorMap: () => ({ message: "Pilih mode pertemuan" }),
+    }),
+    latitude: z.string().optional(),
+    longitude: z.string().optional(),
+    start_at: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.mode === "offline") {
+        return data.latitude && data.longitude;
+      }
+      return true;
+    },
+    {
+      message: "Latitude dan Longitude wajib diisi untuk mode offline",
+      path: ["latitude"],
+    }
+  );
 
 type MeetingValues = z.infer<typeof meetingSchema>;
 
@@ -131,14 +150,6 @@ const CourseFormPage = () => {
     }
   }, [course, reset]);
 
-  // === MATERIALS & MEETINGS ===
-  const { refetch: refetchMaterials } = useQuery({
-    queryKey: ["materials", id],
-    queryFn: () => materialService.getByCourseId(id!),
-    enabled: !!id,
-  });
-
-  // === MUTATIONS ===
   const saveCourse = useMutation({
     mutationFn: (formData: FormData) =>
       isEdit
@@ -150,45 +161,59 @@ const CourseFormPage = () => {
     },
   });
 
-  const deleteMaterial = useMutation({
-    mutationFn: (mid: string) => materialService.delete(mid),
-    onSuccess: () => {
-      toast.success("Materi dihapus");
-      refetchMaterials();
-    },
-  });
-
-  const addMeeting = useMutation({
-    mutationFn: (payload: { title: string }) =>
-      courseService.createCourseMeeting(id!, payload),
-    onSuccess: () => {
-      toast.success("Pertemuan berhasil ditambahkan");
-      setShowAddMeeting(false);
-    },
-  });
-
-  const addMaterial = useMutation({
-    mutationFn: (formData: FormData) =>
-      courseService.addCourseMaterials(id!, formData),
-    onSuccess: () => {
-      toast.success("File materi berhasil diunggah");
-      refetchMaterials();
-      setShowAddMaterial(false);
-    },
-  });
-
   // === FORM MEETING ===
   const {
     register: registerMeeting,
     handleSubmit: handleSubmitMeeting,
     reset: resetMeetingForm,
+    watch,
   } = useForm<MeetingValues>({
     resolver: zodResolver(meetingSchema),
   });
 
+  const mode = watch("mode");
+
+  // === Auto get location when offline ===
+  useEffect(() => {
+    if (mode === "offline" && navigator.geolocation) {
+      toast.info("Mengambil lokasi... Mohon tunggu");
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          resetMeetingForm((prev) => ({
+            ...prev,
+            latitude: latitude.toString(),
+            longitude: longitude.toString(),
+          }));
+          toast.success("Koordinat berhasil didapatkan otomatis!");
+        },
+        (error) => {
+          console.error(error);
+          toast.error("Gagal mendapatkan lokasi. Pastikan izin lokasi aktif.");
+        }
+      );
+    }
+  }, [mode, resetMeetingForm]);
+
+  const addMeeting = useMutation({
+    mutationFn: (payload: MeetingValues) =>
+      courseService.createCourseMeeting(id!, payload),
+    onSuccess: () => {
+      toast.success("Pertemuan berhasil ditambahkan");
+      setShowAddMeeting(false);
+      resetMeetingForm();
+    },
+  });
+
   const onSubmitMeeting = (values: MeetingValues) => {
-    addMeeting.mutate({ title: values.title });
-    resetMeetingForm();
+    const payload = {
+      title: values.title,
+      mode: values.mode,
+      latitude: values.mode === "offline" ? values.latitude ?? "" : "",
+      longitude: values.mode === "offline" ? values.longitude ?? "" : "",
+      start_at: values.start_at,
+    };
+    addMeeting.mutate(payload);
   };
 
   // === FORM MATERIAL ===
@@ -199,6 +224,16 @@ const CourseFormPage = () => {
   const { handleSubmit: handleSubmitMaterial, reset: resetMaterialForm } =
     materialForm;
 
+  const addMaterial = useMutation({
+    mutationFn: (formData: FormData) =>
+      courseService.addCourseMaterials(id!, formData),
+    onSuccess: () => {
+      toast.success("File materi berhasil diunggah");
+      resetMaterialForm();
+      setShowAddMaterial(false);
+    },
+  });
+
   const onSubmitMaterial = (values: MaterialValues) => {
     if (!values.file?.[0]) {
       toast.error("File wajib diunggah");
@@ -207,7 +242,6 @@ const CourseFormPage = () => {
     const formData = new FormData();
     formData.append("file", values.file[0]);
     addMaterial.mutate(formData);
-    resetMaterialForm();
   };
 
   return (
@@ -292,19 +326,53 @@ const CourseFormPage = () => {
                   {...registerMeeting("title")}
                   placeholder="Judul pertemuan"
                   className="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2"
+                  required
                 />
+
+                {/* Mode Select */}
+                <select
+                  {...registerMeeting("mode")}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 text-slate-200"
+                  required
+                >
+                  <option value="">Pilih mode</option>
+                  <option value="offline">Offline</option>
+                  <option value="online">Online</option>
+                </select>
+
+                {/* Latitude & Longitude otomatis saat offline */}
+                {mode === "offline" && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      {...registerMeeting("latitude")}
+                      placeholder="Latitude (otomatis)"
+                      readOnly
+                      className="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 opacity-80 cursor-not-allowed"
+                    />
+                    <input
+                      type="text"
+                      {...registerMeeting("longitude")}
+                      placeholder="Longitude (otomatis)"
+                      readOnly
+                      className="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 opacity-80 cursor-not-allowed"
+                    />
+                  </div>
+                )}
+
                 <input
                   type="datetime-local"
                   {...registerMeeting("start_at")}
                   className="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2"
                 />
+
                 <button className="w-full bg-amber-500 text-slate-900 py-2 rounded-md font-semibold hover:bg-amber-400 transition">
                   Simpan Pertemuan
                 </button>
               </form>
             )}
 
-            {course.courseMeeting.length === 0 ? (
+            {course.courseMeeting?.length === 0 ? (
               <p className="text-slate-400 text-sm italic">
                 Belum ada pertemuan ditambahkan.
               </p>
@@ -369,7 +437,7 @@ const CourseFormPage = () => {
               </FormProvider>
             )}
 
-            {course.courseMaterial.length === 0 ? (
+            {course.courseMaterial?.length === 0 ? (
               <p className="text-slate-400 text-sm italic">
                 Belum ada file materi diunggah.
               </p>
@@ -390,7 +458,7 @@ const CourseFormPage = () => {
                     <button
                       onClick={() =>
                         confirm("Yakin hapus file ini?") &&
-                        deleteMaterial.mutate(mat.id)
+                        courseService.deleteMaterial(mat.id)
                       }
                       className="text-red-400 hover:text-red-300 transition"
                     >

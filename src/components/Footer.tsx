@@ -1,35 +1,22 @@
-import React from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Footer = () => {
+  const { t } = useTranslation("footer");
+
   return (
     <footer className="relative bg-transparent text-white py-24 overflow-hidden">
-      {/* Ambient Glow Background */}
-      {/* <div className="absolute inset-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-yellow-500/10 blur-[200px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-yellow-400/5 blur-[120px]" />
-      </div> */}
-
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8 z-10">
-        {/* Main Grid */}
         <div className="grid md:grid-cols-3 gap-10 border-b border-slate-800 pb-10">
           {/* Company Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <div>
             <h3 className="text-2xl font-bold mb-4 text-yellow-400">
-              Wajrasena Garda Nusantara
+              {t("company")}
             </h3>
             <p className="text-gray-400 leading-relaxed mb-5">
-              Lembaga pelatihan dan pengembangan SDM keamanan berbasis
-              teknologi. Kami membangun profesionalisme dengan disiplin dan
-              dedikasi tinggi.
+              {t("description")}
             </p>
-
-            {/* Logo Placeholder */}
             <div className="flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/20 rounded-xl px-4 py-2 w-fit">
               <img
                 src="/logo1.png"
@@ -37,26 +24,22 @@ const Footer = () => {
                 className="h-8 w-auto object-contain"
               />
               <span className="text-yellow-400 font-semibold">
-                Wajrasena Garda Nusantara
+                {t("company")}
               </span>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Quick Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.6 }}
-          >
+          {/* Navigation */}
+          <div>
             <h4 className="text-lg font-semibold mb-4 text-yellow-400">
-              Navigasi
+              {t("navigation_title")}
             </h4>
             <ul className="space-y-3 text-gray-400">
               {[
-                { label: "Beranda", href: "#home" },
-                { label: "Program", href: "#programs" },
-                { label: "Berita", href: "#news" },
-                { label: "Tentang", href: "#about" },
+                { label: t("navigation_links.home"), href: "#home" },
+                { label: t("navigation_links.programs"), href: "#programs" },
+                { label: t("navigation_links.news"), href: "#news" },
+                { label: t("navigation_links.about"), href: "#about" },
               ].map((item, i) => (
                 <li key={i}>
                   <a
@@ -69,43 +52,38 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
-          </motion.div>
+          </div>
 
-          {/* Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-          >
+          {/* Contact */}
+          <div>
             <h4 className="text-lg font-semibold mb-4 text-yellow-400">
-              Kontak Kami
+              {t("contact_title")}
             </h4>
             <div className="text-gray-400 space-y-3">
               <p className="flex items-center gap-2 hover:text-yellow-400 transition">
-                <Mail size={16} className="text-yellow-400" />
-                info@warganusa.com
+                <Mail size={16} className="text-yellow-400" />{" "}
+                {t("contact.email")}
               </p>
               <p className="flex items-center gap-2 hover:text-yellow-400 transition">
-                <Phone size={16} className="text-yellow-400" /> +62 21 1234 5678
+                <Phone size={16} className="text-yellow-400" />{" "}
+                {t("contact.phone")}
               </p>
               <p className="flex items-center gap-2 hover:text-yellow-400 transition">
-                <MapPin size={16} className="text-yellow-400" /> Jakarta,
-                Indonesia
+                <MapPin size={16} className="text-yellow-400" />{" "}
+                {t("contact.address")}
               </p>
             </div>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Bottom Section */}
+        {/* Bottom */}
         <div className="flex flex-col md:flex-row justify-between items-center mt-8 text-sm text-gray-500">
           <p>
-            © {new Date().getFullYear()}{" "}
-            <span className="text-yellow-400 font-semibold">
-              Wajrasena Garda Nusantara
-            </span>
-            . All rights reserved.
+            {t("copyright", {
+              year: new Date().getFullYear(),
+              company: t("company"),
+            })}
           </p>
-
           <div className="flex items-center gap-4 mt-4 md:mt-0">
             {["facebook", "twitter", "instagram"].map((social, i) => (
               <motion.a
@@ -120,33 +98,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-
-      {/* Animated dots / particles for depth */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        {[...Array(8)].map((_, i) => (
-          <motion.span
-            key={i}
-            className="absolute bg-yellow-400/20 rounded-full"
-            style={{
-              width: Math.random() * 8 + 4,
-              height: Math.random() * 8 + 4,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -20, 0],
-              opacity: [0.3, 1, 0.3],
-            }}
-            transition={{
-              duration: Math.random() * 5 + 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
     </footer>
   );
 };
-
 export default Footer;

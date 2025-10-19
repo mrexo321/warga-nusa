@@ -40,4 +40,9 @@ export const attendanceService = {
     const response = await axiosInstance.delete(`/attendance/${id}`);
     return response.data;
   },
+
+  async todayAttendance() {
+    const response = await axiosInstance.get(`/attendance/today`);
+    return response.data;
+  },
 };

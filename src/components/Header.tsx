@@ -3,33 +3,48 @@ import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const Header = () => {
+  const { t, i18n } = useTranslation("header");
   const userSelector = useSelector((state: RootState) => state.user.token);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
 
-  // Scroll effect for header background
+  // Efek scroll
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 30);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 30);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // List of navigation items
+  // Load bahasa dari localStorage
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang") || "id";
+    i18n.changeLanguage(savedLang);
+  }, [i18n]);
+
+  // Saklar bahasa
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "id" ? "en" : "id";
+    i18n.changeLanguage(newLang);
+    localStorage.setItem("lang", newLang);
+  };
+
   const navItems = [
-    { label: "Home", path: "/" },
-    { label: "About Us", path: "/homeabout" },
-    { label: "Klien & Portfolio", path: "/client-porto" },
-    { label: "Karir", path: "/karir" },
-    { label: "Kontak Kami", path: "/contact-us" },
+    { label: t("nav.home"), path: "/" },
+    { label: t("nav.about"), path: "/homeabout" },
+    { label: t("nav.client"), path: "/client-porto" },
+    { label: t("nav.career"), path: "/karir" },
+    { label: t("nav.contact"), path: "/contact-us" },
   ];
 
   return (
-    <header
+    <motion.header
+      initial={{ y: -60, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${
         isScrolled
           ? "bg-gradient-to-r from-[#0f0f0f]/90 via-[#1a1a1a]/80 to-[#2a2a2a]/90 backdrop-blur-md border-b border-yellow-400/30 shadow-[0_4px_25px_rgba(250,204,21,0.08)]"
@@ -38,24 +53,14 @@ const Header = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3">
         {/* === LOGO === */}
-        <div className="flex items-center gap-3">
-          <motion.img
-            src="https://logoipsum.com/logo/logo-7.svg"
-            alt="Logo Icon"
-            className="h-10 w-auto object-contain"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          />
-          <motion.img
-            src="https://logoipsum.com/logo/logo-9.svg"
-            alt="Logo Text"
-            className="h-10 w-auto object-contain"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          />
-        </div>
+        <motion.img
+          src="/assets/logo1.png"
+          alt={t("logoAlt")}
+          className="h-10 w-auto object-contain"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        />
 
         {/* === NAV DESKTOP === */}
         <nav className="hidden md:flex items-center space-x-8 text-sm font-medium">
@@ -89,21 +94,42 @@ const Header = () => {
           })}
         </nav>
 
-        {/* === USER ACTION === */}
-        <div className="hidden md:flex items-center space-x-3">
+        {/* === LANGUAGE SWITCH + USER === */}
+        <div className="hidden md:flex items-center space-x-5">
+          {/* Saklar Bahasa */}
+          <div
+            className="relative w-16 h-8 bg-gray-600 rounded-full cursor-pointer border border-yellow-400/40 flex items-center"
+            onClick={toggleLanguage}
+          >
+            <motion.div
+              layout
+              className={`absolute w-7 h-7 rounded-full bg-yellow-400 shadow-md ${
+                i18n.language === "id" ? "left-1" : "right-1"
+              }`}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            />
+            <span className="absolute left-2 text-xs text-black font-bold">
+              ID
+            </span>
+            <span className="absolute right-2 text-xs text-black font-bold">
+              EN
+            </span>
+          </div>
+
+          {/* Login / Dashboard */}
           {userSelector ? (
             <Link
               to="/dashboard"
               className="border border-yellow-400 bg-yellow-400 text-black font-semibold px-4 py-1.5 rounded-lg hover:bg-yellow-500 transition"
             >
-              Dashboard
+              {t("nav.dashboard")}
             </Link>
           ) : (
             <Link
               to="/login"
               className="text-gray-200 border border-yellow-400/60 px-4 py-1.5 rounded-lg hover:bg-yellow-400 hover:text-black transition"
             >
-              Log in
+              {t("nav.login")}
             </Link>
           )}
         </div>
@@ -174,13 +200,33 @@ const Header = () => {
                 );
               })}
 
+              {/* Saklar Bahasa (mobile) */}
+              <div
+                className="relative w-16 h-8 bg-gray-600 rounded-full cursor-pointer border border-yellow-400/40 flex items-center mt-4"
+                onClick={toggleLanguage}
+              >
+                <motion.div
+                  layout
+                  className={`absolute w-7 h-7 rounded-full bg-yellow-400 shadow-md ${
+                    i18n.language === "id" ? "left-1" : "right-1"
+                  }`}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                />
+                <span className="absolute left-2 text-xs text-black font-bold">
+                  ID
+                </span>
+                <span className="absolute right-2 text-xs text-black font-bold">
+                  EN
+                </span>
+              </div>
+
               {userSelector ? (
                 <Link
                   to="/dashboard"
                   className="border border-yellow-400 bg-yellow-400 text-black font-semibold px-5 py-2 rounded-lg hover:bg-yellow-500 transition"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Dashboard
+                  {t("nav.dashboard")}
                 </Link>
               ) : (
                 <Link
@@ -188,14 +234,14 @@ const Header = () => {
                   className="text-gray-200 border border-yellow-400/60 px-5 py-2 rounded-lg hover:bg-yellow-400 hover:text-black transition"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Log in
+                  {t("nav.login")}
                 </Link>
               )}
             </nav>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 };
 

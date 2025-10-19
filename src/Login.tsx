@@ -144,7 +144,7 @@ const Login = () => {
         </form>
 
         {/* Link tambahan */}
-        <div className="mt-6 text-center text-sm text-gray-400">
+        {/* <div className="mt-6 text-center text-sm text-gray-400">
           Belum punya akun?{" "}
           <span
             onClick={() => navigate("/register")}
@@ -152,7 +152,7 @@ const Login = () => {
           >
             Daftar Sekarang
           </span>
-        </div>
+        </div> */}
       </motion.div>
     </div>
   );

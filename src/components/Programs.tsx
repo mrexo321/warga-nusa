@@ -1,11 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
-import Section from "./Section";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { courseService } from "../services/courseService";
 import environment from "../config/environment";
 import { BookOpen, Tag } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const ProgramCard = ({ id, name, description, thumbnail, category, index }) => {
   return (
@@ -14,7 +14,10 @@ const ProgramCard = ({ id, name, description, thumbnail, category, index }) => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.6 }}
       viewport={{ once: true }}
-      className="bg-gradient-to-b from-zinc-900/80 via-slate-900/90 to-black/90 rounded-2xl shadow-lg hover:shadow-yellow-400/30 border border-slate-800/70 overflow-hidden group transition-all duration-500 hover:-translate-y-2"
+      className="relative bg-gradient-to-b from-[#1E1E1E]/90 via-[#141414]/90 to-black/95
+             border border-amber-500/20 rounded-2xl shadow-md
+             hover:shadow-amber-400/40 overflow-hidden
+             group transition-all duration-500 hover:-translate-y-2 cursor-pointer"
     >
       {/* Gambar Thumbnail */}
       <div className="relative h-52 overflow-hidden">
@@ -44,7 +47,7 @@ const ProgramCard = ({ id, name, description, thumbnail, category, index }) => {
             to={`/homeprogram/${id}`}
             className="relative overflow-hidden bg-yellow-500 text-black px-4 py-1.5 rounded-lg font-semibold text-sm transition-all duration-300 hover:shadow-yellow-400/40"
           >
-            <span className="relative z-10">Lihat Detail</span>
+            <span className="relative z-10">Detail</span>
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 opacity-0 group-hover:opacity-30 transition-opacity duration-700" />
           </Link>
         </div>
@@ -54,6 +57,7 @@ const ProgramCard = ({ id, name, description, thumbnail, category, index }) => {
 };
 
 const Programs = () => {
+  const { t } = useTranslation("programs");
   const { data: courses } = useSuspenseQuery({
     queryKey: ["programs"],
     queryFn: courseService.getAll,
@@ -64,41 +68,34 @@ const Programs = () => {
       id="programs"
       className="relative bg-transparent text-white py-24 overflow-hidden"
     >
-      {/* Cahaya Ambient */}
-      {/* <div className="absolute inset-0">
-        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-yellow-500/10 blur-[180px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-yellow-400/10 blur-[120px]" />
-      </div> */}
-
       {/* Header */}
-      <div className="relative text-center mb-16 z-10">
+      <div className="relative text-center mb-16 z-10 px-4">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-3xl md:text-4xl font-bold text-yellow-400 mb-3 tracking-wide"
         >
-          Program Pelatihan
+          {t("title")}
         </motion.h2>
+
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
           className="text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed"
         >
-          Tingkatkan kompetensi dan profesionalisme Anda melalui{" "}
-          <span className="text-yellow-400 font-semibold">
-            program unggulan
-          </span>{" "}
-          yang kami sediakan.
+          {t("description")}
         </motion.p>
       </div>
 
-      {/* Grid Card */}
-      <div className="relative grid md:grid-cols-2 lg:grid-cols-3 gap-10 z-10">
-        {courses.map((course, index) => (
-          <ProgramCard key={index} index={index} {...course} />
-        ))}
+      {/* Grid Card (dibungkus container agar tidak menempel) */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {courses.map((course, index) => (
+            <ProgramCard key={index} index={index} {...course} />
+          ))}
+        </div>
       </div>
 
       {/* Tombol */}
@@ -107,7 +104,7 @@ const Programs = () => {
           whileHover={{ scale: 1.05 }}
           className="relative bg-yellow-500 text-black font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-yellow-400/40 overflow-hidden group transition-all"
         >
-          <span className="relative z-10">Lihat Semua Program</span>
+          <span className="relative z-10">{t("buttons.viewAll")}</span>
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-400 opacity-0 group-hover:opacity-20 transition-opacity duration-700"></div>
         </motion.button>
       </div>

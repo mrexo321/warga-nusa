@@ -24,9 +24,10 @@ import AddNews from "./views/admin/news/AddNews";
 import HomeAbout from "./views/home/about/HomeAbout";
 import ClientAndPorto from "./views/home/clientporto/ClientAndPorto";
 import ContactUs from "./views/home/contact/ContactUs";
-import AddShift from "./views/admin/shift/AddShift";
+import AddShift from "./views/admin/shift/AssignShift";
 import AddCourse from "./views/admin/course/AddCourse";
 import HomeNewsPreview from "./views/home/news/HomeNewsPreview";
+import AssignShift from "./views/admin/shift/AssignShift";
 
 function App() {
   return (
@@ -47,7 +48,7 @@ function App() {
       <Route element={<ProtectedRoutes allowedRoles={["admin"]} />}>
         <Route path="/users" element={<ManagementUser />} />
         <Route path="/shift" element={<ManagementShift />} />
-        <Route path="/shift/add" element={<AddShift />} />
+        <Route path="/shift-assignment" element={<AssignShift />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/courses" element={<ManagementCourse />} />
         <Route path="/courses/add" element={<AddCourse />} />

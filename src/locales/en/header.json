@@ -1,0 +1,16 @@
+{
+  "logoAlt": "Logo",
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "client": "Clients & Portfolio",
+    "career": "Career",
+    "contact": "Contact Us",
+    "login": "Log in",
+    "dashboard": "Dashboard"
+  },
+  "language": {
+    "id": "🇮🇩 ID",
+    "en": "🇬🇧 EN"
+  }
+}

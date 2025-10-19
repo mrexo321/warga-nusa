@@ -1,0 +1,18 @@
+{
+  "company": "Wajrasena Garda Nusantara",
+  "description": "A security human resources training and development institution based on technology. We build professionalism with discipline and high dedication.",
+  "navigation_title": "Navigation",
+  "navigation_links": {
+    "home": "Home",
+    "programs": "Programs",
+    "news": "News",
+    "about": "About"
+  },
+  "contact_title": "Contact Us",
+  "contact": {
+    "email": "info@warganusa.com",
+    "phone": "+62 21 1234 5678",
+    "address": "Jakarta, Indonesia"
+  },
+  "copyright": "© {{year}} {{company}}. All rights reserved."
+}

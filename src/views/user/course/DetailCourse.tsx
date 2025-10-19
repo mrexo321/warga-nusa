@@ -210,72 +210,80 @@ const DetailCourse = () => {
               List Pertemuan
             </h2>
 
-            <div className="overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800 hover:scrollbar-thumb-slate-600 flex-1">
-              {course.courseMeeting.map((meet) => (
-                <div
-                  key={meet.id}
-                  onClick={() => setselectedMeeting(meet)}
-                  className={`p-3 rounded-lg border transition-all cursor-pointer ${
-                    selectedMeeting?.id === meet.id
-                      ? "border-blue-500 bg-blue-500/20"
-                      : "border-slate-700 hover:bg-slate-700/40"
-                  }`}
-                >
-                  <p
-                    className={`font-medium text-sm ${
+            {course.courseMeeting && course.courseMeeting.length > 0 ? (
+              <div className="overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800 hover:scrollbar-thumb-slate-600 flex-1">
+                {course.courseMeeting.map((meet) => (
+                  <div
+                    key={meet.id}
+                    onClick={() => setselectedMeeting(meet)}
+                    className={`p-3 rounded-lg border transition-all cursor-pointer ${
                       selectedMeeting?.id === meet.id
-                        ? "text-blue-300"
-                        : "text-slate-200"
+                        ? "border-blue-500 bg-blue-500/20"
+                        : "border-slate-700 hover:bg-slate-700/40"
                     }`}
                   >
-                    {meet.title}
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    {new Date(meet.startAt).toLocaleString("id-ID", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-              ))}
-            </div>
+                    <p
+                      className={`font-medium text-sm ${
+                        selectedMeeting?.id === meet.id
+                          ? "text-blue-300"
+                          : "text-slate-200"
+                      }`}
+                    >
+                      {meet.title}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {new Date(meet.startAt).toLocaleString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-slate-400 text-sm italic">
+                Belum ada pertemuan untuk kursus ini.
+              </p>
+            )}
           </div>
 
-          {/* Absensi */}
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={() => setScanning(true)}
-              className="flex-1 bg-gradient-to-r from-sky-600 to-blue-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:opacity-90 transition"
-            >
-              <Camera size={20} /> Scan QR untuk Absensi
-            </button>
+          {/* === ABSENSI === */}
+          {course.courseMeeting && course.courseMeeting.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => setScanning(true)}
+                className="flex-1 bg-gradient-to-r from-sky-600 to-blue-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:opacity-90 transition"
+              >
+                <Camera size={20} /> Scan QR untuk Absensi
+              </button>
 
-            <div className="bg-slate-800/50 border border-slate-700/60 rounded-xl p-4 shadow">
-              <p className="text-sm text-slate-300 mb-2 font-medium">
-                Atau masukkan kode manual:
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={manualCode}
-                  onChange={(e) => setManualCode(e.target.value)}
-                  className="flex-1 bg-slate-900 border border-slate-700 text-white px-3 py-2 rounded-lg outline-none"
-                  placeholder="Masukkan kode absensi..."
-                />
-                <button
-                  onClick={handleManualSubmit}
-                  disabled={attendanceMutation.isPending}
-                  className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-4 rounded-lg font-semibold flex items-center gap-1"
-                >
-                  <Send size={16} />
-                  Kirim
-                </button>
+              <div className="bg-slate-800/50 border border-slate-700/60 rounded-xl p-4 shadow">
+                <p className="text-sm text-slate-300 mb-2 font-medium">
+                  Atau masukkan kode manual:
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={manualCode}
+                    onChange={(e) => setManualCode(e.target.value)}
+                    className="flex-1 bg-slate-900 border border-slate-700 text-white px-3 py-2 rounded-lg outline-none"
+                    placeholder="Masukkan kode absensi..."
+                  />
+                  <button
+                    onClick={handleManualSubmit}
+                    disabled={attendanceMutation.isPending}
+                    className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-4 rounded-lg font-semibold flex items-center gap-1"
+                  >
+                    <Send size={16} />
+                    Kirim
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

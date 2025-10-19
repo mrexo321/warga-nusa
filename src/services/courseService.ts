@@ -47,7 +47,15 @@ export const courseService = {
     return response.data;
   },
 
-  async createCourseMeeting(courseId: string, payload: { title: string }) {
+  async createCourseMeeting(
+    courseId: string,
+    payload: {
+      title: string;
+      mode: string;
+      latitude: string;
+      longitude: string;
+    }
+  ) {
     const response = await axiosInstance.post(
       `/course/${courseId}/meetings`,
       payload
@@ -84,5 +92,10 @@ export const courseService = {
       payload
     );
     return response.data;
+  },
+
+  async getTakenCourse() {
+    const response = await axiosInstance.get(`/course/taken-course`);
+    return response.data.data;
   },
 };

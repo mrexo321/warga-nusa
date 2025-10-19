@@ -18,10 +18,33 @@ export const shiftService = {
     return response.data;
   },
 
-  async getUserShift(year, month) {
+  async getUserShift(year: any, month: any) {
     const response = await axiosInstance.get(
       `/user-shifts?year=${year}&month=${month}`
     );
+    return response.data;
+  },
+
+  async createShift(payload: {
+    name: string;
+    checkOut: string;
+    checkIn: string;
+  }) {
+    const response = await axiosInstance.post(`/shift`, payload);
+
+    return response.data;
+  },
+
+  async updateShift(
+    shiftId: string,
+    payload: { name: string; checkIn: string; checkOut: string }
+  ) {
+    const response = await axiosInstance.put(`/shift/${shiftId}`, payload);
+    return response.data;
+  },
+
+  async deleteShift(shiftId: string) {
+    const response = await axiosInstance.delete(`/shift/${shiftId}`);
     return response.data;
   },
 };

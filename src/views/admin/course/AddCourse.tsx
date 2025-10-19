@@ -21,12 +21,11 @@ import {
 import { Slate, Editable, withReact, useSlate } from "slate-react";
 import { withHistory } from "slate-history";
 
-// 🔹 Schema Zod
+// 🔹 Schema Zod (tanpa kategori)
 const courseSchema = z.object({
   code: z.string().min(1, "Kode kursus wajib diisi"),
   name: z.string().min(1, "Nama kursus wajib diisi"),
   description: z.string().min(1, "Deskripsi wajib diisi"),
-  category: z.string().min(1, "Kategori wajib dipilih"),
   thumbnail: z.instanceof(File).optional(),
 });
 
@@ -153,12 +152,6 @@ const AddCourse = () => {
   const navigate = useNavigate();
   const [preview, setPreview] = useState<string | null>(null);
 
-  const categories = [
-    { id: 1, name: "Keamanan" },
-    { id: 2, name: "Kedisiplinan" },
-    { id: 3, name: "Pelatihan Fisik" },
-  ];
-
   const {
     register,
     handleSubmit,
@@ -171,7 +164,6 @@ const AddCourse = () => {
       code: "",
       name: "",
       description: "",
-      category: "",
     },
   });
 
@@ -191,20 +183,18 @@ const AddCourse = () => {
       formData.append("code", data.code);
       formData.append("name", data.name);
       formData.append("description", data.description);
-      formData.append("category", data.category);
       if (data.thumbnail) formData.append("thumbnail", data.thumbnail);
       return courseService.create(formData);
     },
     onSuccess: () => {
       toast.success("Kursus berhasil ditambahkan!");
-      navigate("/management/course");
+      navigate("/courses");
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || "Gagal menambahkan kursus");
     },
   });
 
-  // 🔹 Submit form
   const onSubmit = (data: CourseForm) => createMutation.mutate(data);
 
   return (
@@ -288,29 +278,6 @@ const AddCourse = () => {
             />
             {errors.name && (
               <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
-            )}
-          </div>
-
-          {/* Kategori */}
-          <div>
-            <label className="block text-slate-300 font-medium mb-2">
-              Kategori
-            </label>
-            <select
-              {...register("category")}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-200 focus:ring-2 focus:ring-amber-500 outline-none"
-            >
-              <option value="">-- Pilih Kategori --</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.name}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-            {errors.category && (
-              <p className="text-red-400 text-sm mt-1">
-                {errors.category.message}
-              </p>
             )}
           </div>
 

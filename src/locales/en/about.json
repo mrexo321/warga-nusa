@@ -1,0 +1,15 @@
+{
+  "title": "About {{brand}}",
+  "description": "{{brand}} is a professional institution focused on security training & services in Indonesia. With over 15 years of experience, we have trained thousands of disciplined security personnel ready to face real-world challenges.",
+  "stats": {
+    "experience": "Years of Experience",
+    "graduates": "Graduates",
+    "clients": "Clients",
+    "instructors": "Instructors"
+  },
+  "imageSection": {
+    "title": "Professional Security Training",
+    "text": "We equip participants with technical skills, high discipline, and integrity — the foundation of a true professional security officer.",
+    "button": "View Training Programs"
+  }
+}

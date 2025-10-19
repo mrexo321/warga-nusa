@@ -1,0 +1,15 @@
+{
+  "title": "Tentang {{brand}}",
+  "description": "{{brand}} adalah lembaga profesional yang berfokus pada pelatihan & jasa keamanan di Indonesia. Dengan pengalaman lebih dari 15 tahun, kami telah mencetak ribuan anggota satpam disiplin dan siap menghadapi tantangan dunia nyata.",
+  "stats": {
+    "experience": "Tahun Pengalaman",
+    "graduates": "Lulusan",
+    "clients": "Klien",
+    "instructors": "Instruktur"
+  },
+  "imageSection": {
+    "title": "Pelatihan Security Profesional",
+    "text": "Kami membekali peserta dengan kemampuan teknis, kedisiplinan tinggi, dan integritas yang menjadi dasar utama seorang anggota keamanan profesional.",
+    "button": "Lihat Program Pelatihan"
+  }
+}

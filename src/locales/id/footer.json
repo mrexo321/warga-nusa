@@ -1,0 +1,18 @@
+{
+  "company": "Wajrasena Garda Nusantara",
+  "description": "Lembaga pelatihan dan pengembangan SDM keamanan berbasis teknologi. Kami membangun profesionalisme dengan disiplin dan dedikasi tinggi.",
+  "navigation_title": "Navigasi",
+  "navigation_links": {
+    "home": "Beranda",
+    "programs": "Program",
+    "news": "Berita",
+    "about": "Tentang"
+  },
+  "contact_title": "Kontak Kami",
+  "contact": {
+    "email": "info@warganusa.com",
+    "phone": "+62 21 1234 5678",
+    "address": "Jakarta, Indonesia"
+  },
+  "copyright": "© {{year}} {{company}}. Semua hak dilindungi."
+}

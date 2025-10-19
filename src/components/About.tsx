@@ -1,13 +1,15 @@
 import React from "react";
 import { motion } from "framer-motion";
-import Section from "./Section";
+import { useTranslation } from "react-i18next";
 import StatsCard from "./StatsCard";
 
 const About = () => {
+  const { t } = useTranslation("about");
+
   const stats = [
     {
       number: "15+",
-      label: "Tahun Pengalaman",
+      label: t("stats.experience"),
       icon: (
         <svg
           className="w-8 h-8 text-yellow-400"
@@ -26,7 +28,7 @@ const About = () => {
     },
     {
       number: "10K+",
-      label: "Lulusan",
+      label: t("stats.graduates"),
       icon: (
         <svg
           className="w-8 h-8 text-yellow-400"
@@ -45,7 +47,7 @@ const About = () => {
     },
     {
       number: "500+",
-      label: "Klien",
+      label: t("stats.clients"),
       icon: (
         <svg
           className="w-8 h-8 text-yellow-400"
@@ -64,7 +66,7 @@ const About = () => {
     },
     {
       number: "50+",
-      label: "Instruktur",
+      label: t("stats.instructors"),
       icon: (
         <svg
           className="w-8 h-8 text-yellow-400"
@@ -88,45 +90,39 @@ const About = () => {
       id="about"
       className="relative bg-transparent text-white py-24 overflow-hidden"
     >
-      {/* Intro Section */}
+      {/* Header */}
       <motion.div
-        className="text-center mb-16"
+        className="text-center mb-20"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-4xl md:text-5xl font-extrabold mb-6 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent drop-shadow">
-          Tentang <span className="text-white">WargaNusa</span>
+        <h2 className="text-4xl md:text-5xl font-extrabold mb-6 bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent drop-shadow-lg">
+          {t("title", { brand: "WargaNusa" })}
         </h2>
         <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
-          <span className="font-semibold text-yellow-400">
-            Wajrasena Garda Nusantara (WargaNusa)
-          </span>{" "}
-          adalah lembaga profesional yang berfokus pada{" "}
-          <span className="text-yellow-500 font-bold">
-            pelatihan & jasa keamanan
-          </span>{" "}
-          di Indonesia. Dengan pengalaman lebih dari{" "}
-          <span className="text-yellow-500 font-bold">15 tahun</span>, kami
-          telah mencetak ribuan anggota satpam disiplin dan siap menghadapi
-          tantangan dunia nyata.
+          {t("description", { brand: "Wajrasena Garda Nusantara (WargaNusa)" })}
         </p>
       </motion.div>
 
-      {/* Stats */}
+      {/* Stats Section */}
       <motion.div
-        className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20"
+        className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20 max-w-6xl mx-auto"
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.6 }}
       >
-        {stats.map((stat, index) => (
+        {stats.map((stat, i) => (
           <motion.div
-            key={index}
-            whileHover={{ scale: 1.08 }}
-            transition={{ type: "spring", stiffness: 200 }}
-            className="bg-gray-800/70 border border-yellow-400/20 rounded-2xl shadow-lg hover:shadow-yellow-400/20 backdrop-blur-sm transition-all"
+            key={i}
+            whileHover={{ scale: 1.07 }}
+            transition={{ type: "spring", stiffness: 180 }}
+            className="relative bg-gradient-to-b from-zinc-900/80 via-slate-900/80 to-black/90
+                       border border-slate-800/70 rounded-2xl shadow-md
+                       hover:shadow-yellow-400/30 overflow-hidden
+                       group transition-all duration-500 hover:-translate-y-2"
           >
+            <div className="absolute inset-0 rounded-2xl ring-1 ring-yellow-400/0 group-hover:ring-yellow-400/20 transition-all duration-700" />
             <StatsCard
               number={stat.number}
               label={stat.label}
@@ -136,16 +132,16 @@ const About = () => {
         ))}
       </motion.div>
 
-      {/* Hero Image */}
+      {/* Image Section */}
       <motion.div
-        className="relative rounded-3xl overflow-hidden shadow-2xl max-w-6xl mx-auto group"
+        className="relative rounded-3xl overflow-hidden max-w-6xl mx-auto group shadow-[0_0_25px_rgba(255,215,0,0.05)] "
         initial={{ opacity: 0, scale: 0.95 }}
         whileInView={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.7 }}
       >
         <img
           src="https://images.unsplash.com/photo-1526406915894-6c5e3b8c7c5d?auto=format&fit=crop&w=1600&q=80"
-          alt="Pelatihan Security"
+          alt="Security Training"
           className="w-full object-cover h-[450px] md:h-[550px] transform group-hover:scale-110 transition-all duration-700"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
@@ -157,19 +153,17 @@ const About = () => {
           transition={{ duration: 0.6 }}
         >
           <h3 className="text-3xl md:text-4xl font-bold mb-3 text-yellow-400 drop-shadow-lg">
-            Pelatihan Security Profesional
+            {t("imageSection.title")}
           </h3>
           <p className="text-gray-300 text-lg max-w-xl leading-relaxed">
-            Kami membekali peserta dengan kemampuan teknis, kedisiplinan tinggi,
-            dan integritas yang menjadi dasar utama seorang anggota keamanan
-            profesional.
+            {t("imageSection.text")}
           </p>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="mt-6 px-7 py-3 bg-yellow-400 text-black font-semibold rounded-xl shadow-md hover:bg-yellow-300 transition inline-flex items-center gap-2"
+            className="mt-6 px-7 py-3 bg-yellow-500/90 text-black font-semibold rounded-xl shadow-lg hover:shadow-yellow-400/40 transition-all duration-300 inline-flex items-center gap-2"
           >
-            Lihat Program Pelatihan
+            {t("imageSection.button")}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-5 h-5"

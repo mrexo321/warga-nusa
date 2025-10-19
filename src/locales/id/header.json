@@ -1,0 +1,16 @@
+{
+  "logoAlt": "Logo",
+  "nav": {
+    "home": "Beranda",
+    "about": "Tentang Kami",
+    "client": "Klien & Portofolio",
+    "career": "Karier",
+    "contact": "Kontak Kami",
+    "login": "Masuk",
+    "dashboard": "Dasbor"
+  },
+  "language": {
+    "id": "🇮🇩 ID",
+    "en": "🇬🇧 EN"
+  }
+}

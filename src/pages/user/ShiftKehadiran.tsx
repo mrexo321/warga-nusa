@@ -116,9 +116,9 @@ const ShiftKehadiran = () => {
             </div>
             <div>
               <h2 className="text-lg md:text-xl font-semibold text-white">
-                {user.userId || "Nama Pengguna"}
+                {user.name || "Nama Pengguna"}
               </h2>
-              <p className="text-slate-300 text-sm">Petugas Satpam</p>
+              <p className="text-slate-300 text-sm">Petugas</p>
               <span className="inline-block mt-2 bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded-full text-xs font-medium">
                 {user.role}
               </span>
