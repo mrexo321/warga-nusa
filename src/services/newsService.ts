@@ -10,7 +10,7 @@ export const newsService = {
   // Ambil detail berita berdasarkan ID
   async getById(id: string | number) {
     const response = await axiosInstance.get(`/news/${id}`);
-    return response.data;
+    return response.data.data;
   },
 
   // Tambah berita baru

@@ -14,18 +14,27 @@ export const userService = {
   },
 
   // Tambah user baru
-  async create(payload: FormData) {
+  async create(payload: {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+  }) {
     const response = await axiosInstance.post("/user", payload, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: { "Content-Type": "application/json" },
     });
     return response.data;
   },
 
   // Update user
-  async update(id: string | number, payload: FormData) {
-    const response = await axiosInstance.put(`/user/${id}`, payload, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+  async update(
+    userId: string,
+    payload: {
+      name?: string;
+      email?: string;
+    }
+  ) {
+    const response = await axiosInstance.put(`/user/${userId}`, payload);
     return response.data;
   },
 

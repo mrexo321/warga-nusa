@@ -14,8 +14,19 @@ import Attendance from "./pages/admin/Attendance";
 import ManagementCourse from "./pages/admin/ManagementCourse";
 import ManagementGallery from "./pages/admin/ManagementGallery";
 import ManagementNews from "./pages/admin/ManagementNews";
-import HomeProgram from "./pages/home/Program";
+import HomeProgram from "./pages/home/HomeProgram";
 import HomeNews from "./pages/home/HomeNews";
+import CourseDetailMaterials from "./views/admin/course/CourseDetailMaterials";
+import HomeDetailCourse from "./views/home/course/HomeDetailCourse";
+import CourseFormPage from "./views/admin/course/CourseFormPage";
+import PreviewCourse from "./views/admin/course/PreviewCourse";
+import AddNews from "./views/admin/news/AddNews";
+import HomeAbout from "./views/home/about/HomeAbout";
+import ClientAndPorto from "./views/home/clientporto/ClientAndPorto";
+import ContactUs from "./views/home/contact/ContactUs";
+import AddShift from "./views/admin/shift/AddShift";
+import AddCourse from "./views/admin/course/AddCourse";
+import HomeNewsPreview from "./views/home/news/HomeNewsPreview";
 
 function App() {
   return (
@@ -23,7 +34,12 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/homeprogram" element={<HomeProgram />} />
+      <Route path="/homeabout" element={<HomeAbout />} />
       <Route path="/homenews" element={<HomeNews />} />
+      <Route path="/client-porto" element={<ClientAndPorto />} />
+      <Route path="/contact-us" element={<ContactUs />} />
+      <Route path="/homeprogram/:id" element={<HomeDetailCourse />} />
+      <Route path="/news/:id" element={<HomeNewsPreview />} />
 
       <Route element={<ProtectedRoutes allowedRoles={["admin", "user"]} />}>
         <Route path="/dashboard" element={<Dashboard />} />
@@ -31,10 +47,16 @@ function App() {
       <Route element={<ProtectedRoutes allowedRoles={["admin"]} />}>
         <Route path="/users" element={<ManagementUser />} />
         <Route path="/shift" element={<ManagementShift />} />
+        <Route path="/shift/add" element={<AddShift />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/courses" element={<ManagementCourse />} />
+        <Route path="/courses/add" element={<AddCourse />} />
         <Route path="/news" element={<ManagementNews />} />
+        <Route path="/news/add" element={<AddNews />} />
         <Route path="/gallery" element={<ManagementGallery />} />
+        <Route path="/courses/:id" element={<CourseDetailMaterials />} />
+        <Route path="/courses/preview/:id" element={<PreviewCourse />} />
+        <Route path="/courses/edit/:id" element={<CourseFormPage />} />
       </Route>
 
       <Route element={<ProtectedRoutes allowedRoles={["user"]} />}>

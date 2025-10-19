@@ -10,7 +10,7 @@ const About = () => {
       label: "Tahun Pengalaman",
       icon: (
         <svg
-          className="w-8 h-8 text-yellow-500"
+          className="w-8 h-8 text-yellow-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -29,7 +29,7 @@ const About = () => {
       label: "Lulusan",
       icon: (
         <svg
-          className="w-8 h-8 text-yellow-500"
+          className="w-8 h-8 text-yellow-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -48,7 +48,7 @@ const About = () => {
       label: "Klien",
       icon: (
         <svg
-          className="w-8 h-8 text-yellow-500"
+          className="w-8 h-8 text-yellow-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -67,7 +67,7 @@ const About = () => {
       label: "Instruktur",
       icon: (
         <svg
-          className="w-8 h-8 text-yellow-500"
+          className="w-8 h-8 text-yellow-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -84,7 +84,10 @@ const About = () => {
   ];
 
   return (
-    <Section background="gray" id="about">
+    <section
+      id="about"
+      className="relative bg-transparent text-white py-24 overflow-hidden"
+    >
       {/* Intro Section */}
       <motion.div
         className="text-center mb-16"
@@ -92,24 +95,27 @@ const About = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-6">
-          Tentang WargaNusa
+        <h2 className="text-4xl md:text-5xl font-extrabold mb-6 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent drop-shadow">
+          Tentang <span className="text-white">WargaNusa</span>
         </h2>
-        <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
-          <span className="font-semibold text-gray-900">
+        <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+          <span className="font-semibold text-yellow-400">
             Wajrasena Garda Nusantara (WargaNusa)
           </span>{" "}
-          adalah perusahaan terdepan dalam bidang jasa keamanan dan pelatihan
-          security di Indonesia. Dengan pengalaman lebih dari{" "}
+          adalah lembaga profesional yang berfokus pada{" "}
+          <span className="text-yellow-500 font-bold">
+            pelatihan & jasa keamanan
+          </span>{" "}
+          di Indonesia. Dengan pengalaman lebih dari{" "}
           <span className="text-yellow-500 font-bold">15 tahun</span>, kami
-          menjadi mitra terpercaya bagi institusi, pemerintahan, dan perusahaan
-          swasta.
+          telah mencetak ribuan anggota satpam disiplin dan siap menghadapi
+          tantangan dunia nyata.
         </p>
       </motion.div>
 
-      {/* Stats Grid */}
+      {/* Stats */}
       <motion.div
-        className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
+        className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20"
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.6 }}
@@ -117,8 +123,9 @@ const About = () => {
         {stats.map((stat, index) => (
           <motion.div
             key={index}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.08 }}
             transition={{ type: "spring", stiffness: 200 }}
+            className="bg-gray-800/70 border border-yellow-400/20 rounded-2xl shadow-lg hover:shadow-yellow-400/20 backdrop-blur-sm transition-all"
           >
             <StatsCard
               number={stat.number}
@@ -129,36 +136,58 @@ const About = () => {
         ))}
       </motion.div>
 
-      {/* Training Section */}
+      {/* Hero Image */}
       <motion.div
-        className="relative rounded-2xl overflow-hidden shadow-xl max-w-5xl mx-auto"
+        className="relative rounded-3xl overflow-hidden shadow-2xl max-w-6xl mx-auto group"
         initial={{ opacity: 0, scale: 0.95 }}
         whileInView={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.7 }}
       >
         <img
-          src="https://images.unsplash.com/photo-1605902711622-cfb43c4437d7?auto=format&fit=crop&w=1600&q=80"
+          src="https://images.unsplash.com/photo-1526406915894-6c5e3b8c7c5d?auto=format&fit=crop&w=1600&q=80"
           alt="Pelatihan Security"
-          className="w-full object-cover h-[450px] md:h-[550px]"
+          className="w-full object-cover h-[450px] md:h-[550px] transform group-hover:scale-110 transition-all duration-700"
         />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-        {/* Text Overlay */}
-        <div className="absolute bottom-0 left-0 p-8 md:p-12 text-left text-white">
-          <h3 className="text-3xl font-bold mb-2">
+        <motion.div
+          className="absolute bottom-0 left-0 p-8 md:p-14 text-left text-white"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h3 className="text-3xl md:text-4xl font-bold mb-3 text-yellow-400 drop-shadow-lg">
             Pelatihan Security Profesional
           </h3>
-          <p className="text-gray-200 text-lg max-w-lg">
-            Kami membekali peserta dengan keahlian dan kedisiplinan tinggi, siap
-            menghadapi tantangan keamanan di dunia nyata.
+          <p className="text-gray-300 text-lg max-w-xl leading-relaxed">
+            Kami membekali peserta dengan kemampuan teknis, kedisiplinan tinggi,
+            dan integritas yang menjadi dasar utama seorang anggota keamanan
+            profesional.
           </p>
-          <button className="mt-5 px-6 py-3 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-400 transition">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="mt-6 px-7 py-3 bg-yellow-400 text-black font-semibold rounded-xl shadow-md hover:bg-yellow-300 transition inline-flex items-center gap-2"
+          >
             Lihat Program Pelatihan
-          </button>
-        </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              />
+            </svg>
+          </motion.button>
+        </motion.div>
       </motion.div>
-    </Section>
+    </section>
   );
 };
 

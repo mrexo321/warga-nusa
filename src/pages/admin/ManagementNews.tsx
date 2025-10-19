@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 // === Dummy Author (UUID) ===
 const dummyAuthors = [
@@ -29,6 +30,7 @@ const ManagementNews = () => {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<any>(null);
+  const navigate = useNavigate();
 
   // === Fetch Data ===
   const {
@@ -104,9 +106,7 @@ const ManagementNews = () => {
   };
 
   const openAddModal = () => {
-    reset({ author_id: dummyAuthors[0].id });
-    setEditingNews(null);
-    setIsModalOpen(true);
+    navigate("/news/add");
   };
 
   const openEditModal = (news: any) => {
@@ -130,10 +130,10 @@ const ManagementNews = () => {
       <div className="p-6 space-y-6 text-slate-200">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
-          <h1 className="text-2xl font-bold">Manajemen Berita</h1>
+          <h1 className="text-2xl font-bold text-cyan-400">Manajemen Berita</h1>
           <button
             onClick={openAddModal}
-            className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-200"
+            className="flex items-center space-x-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-200"
           >
             <Plus size={18} />
             <span>Tambah Berita</span>

@@ -4,13 +4,15 @@ export interface IUser {
   userId: string | null;
   token: string | null;
   role: string | null;
+  name: string | null;
+  username: string | null;
 }
 
 // ✅ Ambil dari localStorage jika ada
 const savedUser = localStorage.getItem("user");
 const initialState: IUser = savedUser
   ? JSON.parse(savedUser)
-  : { userId: null, token: null, role: null };
+  : { userId: null, token: null, role: null, username: null, name: null };
 
 const userSlice = createSlice({
   name: "user",
@@ -23,7 +25,13 @@ const userSlice = createSlice({
     },
     clearUserData: () => {
       localStorage.removeItem("user");
-      return { userId: null, token: null, role: null };
+      return {
+        userId: null,
+        token: null,
+        role: null,
+        username: null,
+        name: null,
+      };
     },
   },
 });

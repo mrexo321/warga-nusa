@@ -1,240 +1,302 @@
-import React from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import MainLayout from "../../../layouts/MainLayout";
-import { Clock, Star, CheckCircle2, PlayCircle } from "lucide-react";
+import { Clock, Star, FileText, X, Camera, Send } from "lucide-react";
 import { courseService } from "../../../services/courseService";
 import { toast } from "sonner";
 import environment from "../../../config/environment";
+import { Html5Qrcode } from "html5-qrcode";
 
 const DetailCourse = () => {
   const { id } = useParams<{ id: string }>();
-
   const navigate = useNavigate();
 
-  // Fetch detail course
-  const {
-    data: course,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: course } = useSuspenseQuery({
     queryKey: ["course", id],
     queryFn: () => courseService.getById(id!),
-    enabled: !!id,
-    select: (res) => res.data,
   });
 
-  // Mutation untuk apply course
-  const applyMutation = useMutation({
-    mutationFn: () => courseService.applyCourse(id!),
+  const [selectedMeeting, setselectedMeeting] = useState(
+    course.courseMeeting?.[0] || null
+  );
+  const [scanning, setScanning] = useState(false);
+  const [manualCode, setManualCode] = useState("");
+  const [readerId] = useState("qr-reader-container");
+
+  // === Fungsi untuk ambil lokasi pengguna ===
+  const getCurrentLocation = (): Promise<{
+    latitude: string;
+    longitude: string;
+  }> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Perangkat tidak mendukung geolokasi"));
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          resolve({
+            latitude: pos.coords.latitude.toString(),
+            longitude: pos.coords.longitude.toString(),
+          });
+        },
+        (err) => reject(err),
+        { enableHighAccuracy: true }
+      );
+    });
+  };
+
+  // === MUTATION ABSENSI ===
+  const attendanceMutation = useMutation({
+    mutationFn: (payload: {
+      code: string;
+      latitude: string;
+      longitude: string;
+    }) => courseService.submitAttendance(id!, payload),
     onSuccess: () => {
-      toast.success("Berhasil mendaftar ke kursus ini!");
+      toast.success("Absensi berhasil!");
+      setManualCode("");
     },
+
     onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Gagal mendaftar kursus");
+      toast.error(err.response?.data?.message || "Absensi gagal");
     },
   });
 
-  if (isLoading) {
-    return (
-      <MainLayout>
-        <div className="p-6 text-slate-300">Memuat data kursus...</div>
-      </MainLayout>
-    );
-  }
+  // === SCAN QR ===
+  useEffect(() => {
+    if (!scanning) return;
+    const html5QrCode = new Html5Qrcode(readerId);
+    let alreadyScanned = false; // 🟢 Tambahkan flag
 
-  if (isError || !course) {
-    return (
-      <MainLayout>
-        <div className="p-6 text-red-400">Gagal memuat detail kursus</div>
-      </MainLayout>
-    );
-  }
+    html5QrCode
+      .start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        async (decodedText) => {
+          if (alreadyScanned) return; // 🛑 Abaikan hasil scan berikutnya
+          alreadyScanned = true;
+
+          if (selectedMeeting) {
+            try {
+              const location = await getCurrentLocation();
+              attendanceMutation.mutate({
+                code: decodedText,
+                latitude: location.latitude,
+                longitude: location.longitude,
+              });
+              setScanning(false); // Tutup modal kamera
+            } catch (error) {
+              toast.error("Gagal mengambil lokasi. Aktifkan izin lokasi.");
+              alreadyScanned = false; // izinkan ulang jika error lokasi
+            }
+          }
+        },
+        () => {}
+      )
+      .catch((err) => {
+        toast.error("Gagal membuka kamera: " + err);
+      });
+
+    // 🔴 Cleanup tunggal
+    return () => {
+      html5QrCode.stop().catch(() => {});
+    };
+  }, [scanning]);
+
+  // === SUBMIT MANUAL ===
+  const handleManualSubmit = async () => {
+    if (!manualCode.trim())
+      return toast.error("Masukkan kode terlebih dahulu!");
+    if (!selectedMeeting)
+      return toast.error("Pilih pertemuan terlebih dahulu!");
+
+    try {
+      const location = await getCurrentLocation();
+      attendanceMutation.mutate({
+        code: manualCode.trim(),
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    } catch (error) {
+      toast.error("Gagal mengambil lokasi. Aktifkan izin lokasi.");
+    }
+  };
 
   return (
     <MainLayout>
-      <div className="p-6 space-y-8">
-        {/* Banner */}
-        <div className="relative w-full h-112 rounded-2xl overflow-hidden shadow-lg">
-          <img
-            src={`${environment.IMAGE_URL + course.thumbnail}`}
-            alt={course.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent"></div>
-          <div className="absolute bottom-4 left-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">
-              {course.title}
-            </h1>
-            <div className="flex items-center text-slate-300 text-sm space-x-4 mt-2">
-              <span className="flex items-center">
-                <Clock size={15} className="mr-1 text-amber-400" />{" "}
-                {course.duration}
-              </span>
-              <span className="flex items-center">
-                <Star size={15} className="mr-1 text-yellow-400" />{" "}
-                {course.rating}
-              </span>
-              <span
-                className={`px-3 py-0.5 rounded-full text-xs font-medium ${
-                  course.status === "Sedang Berlangsung"
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-slate-500/20 text-slate-300"
-                }`}
-              >
-                {course.status}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Deskripsi */}
-        <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-white border-b border-slate-700/50 pb-2">
-            Deskripsi Kursus
-          </h2>
-          <p className="text-slate-300 leading-relaxed whitespace-pre-line">
-            {course.description}
-          </p>
-        </div>
-
-        {/* Download Files */}
-        <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 shadow-lg hover:shadow-slate-700/40 transition-all duration-300">
-          <h2 className="text-lg font-semibold text-white border-b border-slate-700/50 pb-3 mb-4 flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-blue-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            File Materi
-          </h2>
-
-          <div className="flex items-center justify-between bg-slate-900/40 border border-slate-700/40 rounded-xl p-4 hover:bg-slate-800/60 transition-colors duration-300">
-            <div className="flex items-center gap-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 text-blue-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v12m0 0l3.5-3.5M12 16l-3.5-3.5M4 20h16"
-                />
-              </svg>
-              <div>
-                <p className="text-sm text-slate-400">Klik untuk mengunduh</p>
-                <p className="text-base font-medium text-white">
-                  {course.file ? course.file.split("/").pop() : "File Materi"}
-                </p>
+      <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* === KONTEN UTAMA === */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Banner */}
+          <div className="relative w-full h-64 sm:h-96 rounded-2xl overflow-hidden shadow-lg">
+            <img
+              src={`${environment.IMAGE_URL + course.thumbnail}`}
+              alt={course.name}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
+            <div className="absolute bottom-4 left-6">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">
+                {course.name}
+              </h1>
+              <div className="flex items-center text-slate-300 text-sm space-x-4 mt-2">
+                <span className="flex items-center">
+                  <Clock size={15} className="mr-1 text-amber-400" /> Durasi:{" "}
+                  {course.duration || " - "}
+                </span>
+                <span className="flex items-center">
+                  <Star size={15} className="mr-1 text-yellow-400" />{" "}
+                  {course.category}
+                </span>
               </div>
             </div>
-
-            {course.file ? (
-              <a
-                href={environment.IMAGE_URL + course.file}
-                target="_blank"
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-500 active:bg-blue-700 transition-all duration-200"
-              >
-                Download
-              </a>
-            ) : (
-              <span className="text-slate-400 italic text-sm">
-                Belum ada file
-              </span>
-            )}
           </div>
+
+          {/* Deskripsi */}
+          <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-white border-b border-slate-700/50 pb-2 mb-3">
+              Deskripsi Kursus
+            </h2>
+            <p className="text-slate-300 leading-relaxed whitespace-pre-line">
+              {course.description}
+            </p>
+          </div>
+
+          {/* Materi */}
+          {course.courseMaterial && course.courseMaterial.length > 0 && (
+            <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 shadow-lg">
+              <h2 className="text-lg font-semibold text-white border-b border-slate-700/50 pb-3 mb-4 flex items-center gap-2">
+                <FileText className="text-emerald-400" />
+                Materi Kursus
+              </h2>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {course.courseMaterial.map((file) => (
+                  <div
+                    key={file.id}
+                    className="group bg-slate-900/40 border border-slate-700/60 hover:border-emerald-500/60 hover:bg-slate-800/60 rounded-xl p-4 flex flex-col justify-between shadow transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="bg-emerald-500/20 p-3 rounded-lg text-emerald-400">
+                        <FileText size={20} />
+                      </div>
+                      <p className="text-slate-200 text-sm font-medium truncate">
+                        {file.fileName}
+                      </p>
+                    </div>
+
+                    <a
+                      href={environment.IMAGE_URL + file.file}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 text-center text-sm font-semibold text-emerald-400 border border-emerald-400/40 rounded-lg py-2 hover:bg-emerald-500/20 transition-all duration-200"
+                    >
+                      Lihat / Unduh
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Progress & Modul */}
-        {course.modules && course.modules.length > 0 && (
-          <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-white border-b border-slate-700/50 pb-2">
-              Progress Belajar
+        {/* === SIDEBAR === */}
+        <div className="flex flex-col h-full space-y-4">
+          {/* List Pertemuan */}
+          <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 shadow-lg flex-1 overflow-hidden flex flex-col">
+            <h2 className="text-lg font-semibold text-white border-b border-slate-700/50 pb-3 mb-4">
+              List Pertemuan
             </h2>
 
-            <div className="space-y-3">
-              <div className="w-full bg-slate-700/40 rounded-full h-3 overflow-hidden">
+            <div className="overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800 hover:scrollbar-thumb-slate-600 flex-1">
+              {course.courseMeeting.map((meet) => (
                 <div
-                  className="bg-amber-400 h-full transition-all"
-                  style={{ width: `${course.progress || 0}%` }}
-                ></div>
-              </div>
-              <span className="text-slate-400 text-sm">
-                {course.progress || 0}% Selesai
-              </span>
-            </div>
-
-            <ul className="mt-4 space-y-3">
-              {course.modules.map((mod: any, i: number) => (
-                <li
-                  key={i}
-                  className={`flex items-center justify-between p-3 rounded-lg border ${
-                    mod.completed
-                      ? "border-green-500/30 bg-green-500/10"
-                      : "border-slate-700/50 bg-slate-700/20"
+                  key={meet.id}
+                  onClick={() => setselectedMeeting(meet)}
+                  className={`p-3 rounded-lg border transition-all cursor-pointer ${
+                    selectedMeeting?.id === meet.id
+                      ? "border-blue-500 bg-blue-500/20"
+                      : "border-slate-700 hover:bg-slate-700/40"
                   }`}
                 >
-                  <span
-                    className={`text-sm ${
-                      mod.completed ? "text-green-400" : "text-slate-300"
+                  <p
+                    className={`font-medium text-sm ${
+                      selectedMeeting?.id === meet.id
+                        ? "text-blue-300"
+                        : "text-slate-200"
                     }`}
                   >
-                    {mod.title}
-                  </span>
-                  {mod.completed ? (
-                    <CheckCircle2 className="text-green-400" size={18} />
-                  ) : (
-                    <PlayCircle className="text-amber-400" size={18} />
-                  )}
-                </li>
+                    {meet.title}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {new Date(meet.startAt).toLocaleString("id-ID", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
-        )}
 
-        {/* Tombol Aksi */}
-        <div className="flex justify-between gap-3">
-          <button
-            onClick={() => navigate("/course-satpam")}
-            className="cursor-pointer px-6 py-3 bg-sky-300 text-sky-800 font-semibold rounded-xl shadow-md hover:bg-sky-400 transition-all duration-200 disabled:opacity-60"
-          >
-            Kembali
-          </button>
-          <div className="flex items-center space-x-4">
-            {/* Tombol Apply */}
+          {/* Absensi */}
+          <div className="flex flex-col gap-3">
             <button
-              onClick={() => applyMutation.mutate()}
-              disabled={applyMutation.isPending}
-              className="px-6 py-3 cursor-pointer bg-emerald-500 text-slate-900 font-semibold rounded-xl shadow-md hover:bg-emerald-400 transition-all duration-200 disabled:opacity-60"
+              onClick={() => setScanning(true)}
+              className="flex-1 bg-gradient-to-r from-sky-600 to-blue-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:opacity-90 transition"
             >
-              {applyMutation.isPending ? "Mendaftar..." : "Apply Course"}
+              <Camera size={20} /> Scan QR untuk Absensi
             </button>
 
-            {/* Tombol Lanjutkan */}
-            <button className="px-6 py-3 cursor-pointer bg-amber-500 text-slate-900 font-semibold rounded-xl shadow-md hover:bg-amber-400 transition-all duration-200 flex items-center space-x-2">
-              <PlayCircle size={18} />
-              <span>
-                {course.progress < 100
-                  ? "Lanjutkan Kursus"
-                  : "Lihat Sertifikat"}
-              </span>
-            </button>
+            <div className="bg-slate-800/50 border border-slate-700/60 rounded-xl p-4 shadow">
+              <p className="text-sm text-slate-300 mb-2 font-medium">
+                Atau masukkan kode manual:
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={manualCode}
+                  onChange={(e) => setManualCode(e.target.value)}
+                  className="flex-1 bg-slate-900 border border-slate-700 text-white px-3 py-2 rounded-lg outline-none"
+                  placeholder="Masukkan kode absensi..."
+                />
+                <button
+                  onClick={handleManualSubmit}
+                  disabled={attendanceMutation.isPending}
+                  className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-4 rounded-lg font-semibold flex items-center gap-1"
+                >
+                  <Send size={16} />
+                  Kirim
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* === MODAL KAMERA === */}
+      {scanning && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <button
+            onClick={() => setScanning(false)}
+            className="absolute top-5 right-5 text-white hover:text-red-400"
+          >
+            <X size={32} />
+          </button>
+          <h3 className="text-white font-semibold mb-4 text-lg">
+            Arahkan kamera ke QR Absensi
+          </h3>
+          <div
+            id={readerId}
+            className="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-lg"
+          />
+        </div>
+      )}
     </MainLayout>
   );
 };

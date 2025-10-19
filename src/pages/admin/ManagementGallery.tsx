@@ -82,14 +82,14 @@ export default function ManagementGallery() {
       <div className="p-6 space-y-6 text-slate-200">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
-          <h1 className="text-2xl font-bold">Manajemen Galeri</h1>
+          <h1 className="text-2xl font-bold text-cyan-400">Manajemen Galeri</h1>
 
           <button
             onClick={() => setOpenForm(!openForm)}
-            className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-200"
+            className="flex items-center space-x-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-200"
           >
             <Plus size={18} />
-            <span>{openForm ? "Tutup Form" : "Tambah Gambar"}</span>
+            <span>{openForm ? "Tutup Form" : "Tambah Gallery"}</span>
           </button>
         </div>
 

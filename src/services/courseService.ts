@@ -12,7 +12,7 @@ export const courseService = {
   // Ambil detail kursus
   async getById(id: string | number) {
     const response = await axiosInstance.get(`/course/${id}`);
-    return response.data;
+    return response.data.data;
   },
 
   // Tambah kursus baru
@@ -44,6 +44,45 @@ export const courseService = {
   async applyCourse(courseId: string) {
     const response = await axiosInstance.post(`/course/apply/${courseId}`);
 
+    return response.data;
+  },
+
+  async createCourseMeeting(courseId: string, payload: { title: string }) {
+    const response = await axiosInstance.post(
+      `/course/${courseId}/meetings`,
+      payload
+    );
+    return response.data;
+  },
+
+  async addCourseMaterials(courseId: string, data: FormData) {
+    const response = await axiosInstance.post(
+      `/course/${courseId}/materials`,
+      data
+    );
+    return response.data;
+  },
+
+  async getMeetingDetail(courseId: string, meetingId: string) {
+    const response = await axiosInstance.get(
+      `/course/${courseId}/meetings/${meetingId}`
+    );
+
+    return response.data.data;
+  },
+
+  async submitAttendance(
+    courseId: string,
+    payload: {
+      code: string;
+      longitude: string;
+      latitude: string;
+    }
+  ) {
+    const response = await axiosInstance.post(
+      `/course/${courseId}/meetings/attend`,
+      payload
+    );
     return response.data;
   },
 };

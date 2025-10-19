@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import MainLayout from "../../layouts/MainLayout";
 import { Plus, Clock, Users, Edit, Trash2, Search } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const ManagementShift = () => {
   const [search, setSearch] = useState("");
@@ -41,12 +42,15 @@ const ManagementShift = () => {
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
-          <h1 className="text-2xl font-bold text-white">Manajemen Shift</h1>
+          <h1 className="text-2xl font-bold text-cyan-400">Manajemen Shift</h1>
 
-          <button className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-200">
+          <Link
+            to={"/shift/add"}
+            className="flex items-center space-x-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-200"
+          >
             <Plus size={18} />
             <span>Tambah Shift</span>
-          </button>
+          </Link>
         </div>
 
         {/* Search Bar */}
