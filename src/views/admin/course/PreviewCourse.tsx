@@ -10,6 +10,7 @@ import {
   QrCode,
   X,
   Clipboard,
+  FileText,
 } from "lucide-react";
 import { courseService } from "../../../services/courseService";
 import environment from "../../../config/environment";
@@ -33,6 +34,8 @@ const PreviewCourse = () => {
   const attendances =
     course.courseMeeting.find((m) => m.id === selectedMeeting?.id)
       ?.attendances || [];
+
+  console.log(course);
 
   return (
     <MainLayout>
@@ -98,26 +101,42 @@ const PreviewCourse = () => {
                   </span>
                 </p>
 
-                {/* File Materi */}
-                <div className="flex flex-col items-center justify-center bg-slate-900/40 border border-slate-700/40 rounded-xl p-6 mb-6">
-                  {selectedMeeting.file ? (
-                    <>
-                      <PlayCircle className="text-blue-400 w-10 h-10 mb-2" />
-                      <a
-                        href={environment.IMAGE_URL + selectedMeeting.file}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 font-semibold"
-                      >
-                        Klik untuk membuka materi
-                      </a>
-                    </>
-                  ) : (
-                    <p className="text-slate-400 italic">
-                      Belum ada file materi untuk pertemuan ini.
-                    </p>
-                  )}
-                </div>
+                {/* Materi */}
+                {course.courseMaterial && course.courseMaterial.length > 0 && (
+                  <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 shadow-lg">
+                    <h2 className="text-lg font-semibold text-white border-b border-slate-700/50 pb-3 mb-4 flex items-center gap-2">
+                      <FileText className="text-emerald-400" />
+                      Materi Kursus
+                    </h2>
+
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {course.courseMaterial.map((file) => (
+                        <div
+                          key={file.id}
+                          className="group bg-slate-900/40 border border-slate-700/60 hover:border-emerald-500/60 hover:bg-slate-800/60 rounded-xl p-4 flex flex-col justify-between shadow transition-all duration-200"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="bg-emerald-500/20 p-3 rounded-lg text-emerald-400">
+                              <FileText size={20} />
+                            </div>
+                            <p className="text-slate-200 text-sm font-medium truncate">
+                              {file.fileName}
+                            </p>
+                          </div>
+
+                          <a
+                            href={environment.IMAGE_URL + file.file}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-4 text-center text-sm font-semibold text-emerald-400 border border-emerald-400/40 rounded-lg py-2 hover:bg-emerald-500/20 transition-all duration-200"
+                          >
+                            Lihat / Unduh
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Daftar User yang sudah absen */}

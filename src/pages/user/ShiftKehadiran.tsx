@@ -1,21 +1,16 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import MainLayout from "../../layouts/MainLayout";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
-import {
-  User,
-  Calendar,
-  Clock,
-  CheckCircle,
-  Eye,
-  Pen,
-  Camera,
-  X,
-} from "lucide-react";
+import { User, Camera, X } from "lucide-react";
 import Webcam from "react-webcam";
 import { attendanceService } from "../../services/attendanceService";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import { shiftService } from "../../services/shiftService";
 
 const ShiftKehadiran = () => {
   const user = useSelector((state: RootState) => state.user);
@@ -24,12 +19,17 @@ const ShiftKehadiran = () => {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null
   );
+  const [currentMonth, setCurrentMonth] = useState<number>(
+    new Date().getMonth() + 1
+  );
+  const [currentYear, setCurrentYear] = useState<number>(
+    new Date().getFullYear()
+  );
   const webcamRef = useRef<Webcam>(null);
 
-  // ✅ useMutation untuk absensi
+  // Absensi
   const { mutate: markAttendance, isPending } = useMutation({
     mutationFn: async (imageBase64: string) => {
-      // Convert Base64 → Blob → File
       const blob = await fetch(imageBase64).then((res) => res.blob());
       const file = new File([blob], "attendance.jpg", { type: "image/jpeg" });
       return await attendanceService.markAttendance(file);
@@ -45,64 +45,58 @@ const ShiftKehadiran = () => {
     },
   });
 
-  // 🔹 Data Dummy
-  const shifts = [
-    { hari: "Senin", shift: "Pagi", jam: "07:00 - 15:00" },
-    { hari: "Selasa", shift: "Siang", jam: "15:00 - 23:00" },
-    { hari: "Rabu", shift: "Malam", jam: "23:00 - 07:00" },
-    { hari: "Kamis", shift: "Pagi", jam: "07:00 - 15:00" },
-    { hari: "Jumat", shift: "Siang", jam: "15:00 - 23:00" },
-  ];
-
-  const rekap = [
-    {
-      label: "Hadir",
-      value: 18,
-      icon: CheckCircle,
-      color: "text-emerald-400",
-      bg: "bg-emerald-500/20",
-    },
-    {
-      label: "Izin",
-      value: 2,
-      icon: Calendar,
-      color: "text-yellow-400",
-      bg: "bg-yellow-500/20",
-    },
-    {
-      label: "Sakit",
-      value: 1,
-      icon: Clock,
-      color: "text-red-400",
-      bg: "bg-red-500/20",
-    },
-  ];
-
-  // 🔹 Ambil lokasi user
-  const getLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) =>
-          setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        (err) => toast.error("Gagal mengambil lokasi: " + err.message)
-      );
-    } else toast.error("Geolocation tidak didukung di browser ini.");
-  };
-
-  // 🔹 Ambil foto dari webcam
   const capturePhoto = () => {
     const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
       setPhoto(imageSrc);
       setIsCameraOpen(false);
-      getLocation();
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) =>
+            setLocation({
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude,
+            }),
+          (err) => toast.error("Gagal mengambil lokasi: " + err.message)
+        );
+      }
     } else toast.error("Gagal mengambil foto.");
   };
 
-  // 🔹 Kirim absensi
   const handleSubmitAttendance = () => {
     if (!photo) return toast.error("Silakan ambil foto terlebih dahulu.");
     markAttendance(photo);
+  };
+
+  // Ambil jadwal shift user
+  const { data: userShiftData, isLoading: loadingShifts } = useQuery({
+    queryKey: ["user-shifts", currentYear, currentMonth],
+    queryFn: () => shiftService.getUserShift(currentYear, currentMonth),
+  });
+
+  // Buat events FullCalendar dari dailyShifts
+  // Buat events FullCalendar dari dailyShifts
+  const userEvents = useMemo(() => {
+    const schedules = userShiftData?.data?.schedules;
+    if (!schedules) return [];
+
+    // mapping semua dailyShifts yang dikembalikan backend (hanya untuk user login)
+    return Object.entries(schedules.dailyShifts || {})
+      .filter(([_, shift]) => shift !== null)
+      .map(([date, shift]: [string, any]) => ({
+        title: shift.name,
+        start: date,
+        allDay: true,
+        backgroundColor: "#2563eb",
+        borderColor: "#1d4ed8",
+        textColor: "#fff",
+      }));
+  }, [userShiftData]);
+
+  const handleDatesSet = (info: any) => {
+    const date = info.view.currentStart;
+    setCurrentYear(date.getFullYear());
+    setCurrentMonth(date.getMonth() + 1);
   };
 
   return (
@@ -134,65 +128,54 @@ const ShiftKehadiran = () => {
           </button>
         </div>
 
-        {/* Rekap Kehadiran */}
+        {/* Kalender Shift User */}
         <div>
           <h3 className="text-white text-lg font-semibold mb-4">
-            Rekap Kehadiran
+            Jadwal Shift Saya
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {rekap.map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl p-5 border border-slate-700/50 bg-slate-800/40 shadow-md flex items-center justify-between hover:scale-[1.02] transition-transform duration-200"
-              >
-                <div>
-                  <h4 className="text-slate-400 text-sm">{item.label}</h4>
-                  <p className="text-2xl font-bold text-white mt-1">
-                    {item.value}
-                  </p>
-                </div>
-                <div className={`${item.bg} p-3 rounded-full`}>
-                  <item.icon className={item.color} size={26} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Jadwal Shift */}
-        <div>
-          <h3 className="text-white text-lg font-semibold mb-4">
-            Jadwal Shift Mingguan
-          </h3>
-          <div className="overflow-x-auto rounded-xl border border-slate-700/50">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gradient-to-r from-blue-900/60 to-indigo-900/40 text-slate-200">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold">Hari</th>
-                  <th className="px-4 py-3 text-left font-semibold">Shift</th>
-                  <th className="px-4 py-3 text-left font-semibold">Jam</th>
-                  <th className="px-4 py-3 text-left font-semibold">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shifts.map((s, i) => (
-                  <tr
-                    key={i}
-                    className={`${
-                      i % 2 === 0 ? "bg-slate-800/30" : "bg-slate-800/10"
-                    } hover:bg-slate-700/30 transition`}
-                  >
-                    <td className="px-4 py-3 text-slate-300">{s.hari}</td>
-                    <td className="px-4 py-3 text-slate-300">{s.shift}</td>
-                    <td className="px-4 py-3 text-slate-300">{s.jam}</td>
-                    <td className="px-4 py-3 text-slate-300 flex space-x-3 items-center">
-                      <Eye className="cursor-pointer w-4 h-4" />
-                      <Pen className="cursor-pointer w-4 h-4" />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-3">
+            {loadingShifts ? (
+              <p className="text-slate-400 text-center py-6">
+                Memuat jadwal...
+              </p>
+            ) : (
+              <FullCalendar
+                plugins={[dayGridPlugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                events={userEvents}
+                height="auto"
+                datesSet={handleDatesSet}
+                headerToolbar={{
+                  left: "prev,next today",
+                  center: "title",
+                  right: "dayGridMonth,dayGridWeek",
+                }}
+                dayCellClassNames={(arg) => {
+                  // Highlight hari weekend
+                  const day = arg.date.getDay();
+                  return day === 0 || day === 6 ? "bg-slate-900/60" : "";
+                }}
+                eventContent={(arg) => (
+                  <div className="flex items-center justify-between gap-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-2 py-1 rounded-lg shadow-sm cursor-pointer hover:scale-105 transition-all duration-150">
+                    <span className="truncate text-xs font-semibold">
+                      {arg.event.title}
+                    </span>
+                  </div>
+                )}
+                dayMaxEvents={2}
+                dayCellDidMount={(arg) => {
+                  // hover highlight untuk hari ada shift
+                  const hasEvent = arg.el.querySelector(".fc-event");
+                  if (hasEvent) {
+                    arg.el.classList.add(
+                      "bg-slate-800/50",
+                      "rounded-lg",
+                      "transition-all"
+                    );
+                  }
+                }}
+              />
+            )}
           </div>
         </div>
 
