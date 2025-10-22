@@ -72,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               </svg>
             </div>
             <h1 className="text-lg font-semibold text-white tracking-wide">
-              WargaNusa
+              WajraSena
             </h1>
           </div>
 

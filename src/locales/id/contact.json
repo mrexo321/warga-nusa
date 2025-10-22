@@ -1,0 +1,18 @@
+{
+  "title": "Hubungi Kami",
+  "description": "Kami siap membantu Anda. Silakan hubungi kami untuk informasi lebih lanjut mengenai pelatihan, kerja sama, atau konsultasi layanan.",
+  "contactInfo": "Informasi Kontak",
+  "addressLabel": "Alamat",
+  "addressValue": "Jl. Veteran No.45, Kedung Waringin, Bekasi, Jawa Barat",
+  "phoneLabel": "Telepon",
+  "phoneValue": "(+62) 812-3456-7890",
+  "emailLabel": "Email",
+  "emailValue": "info@lembagapelatihan.id",
+  "formTitle": "Kirim Pesan",
+  "nameLabel": "Nama Lengkap",
+  "namePlaceholder": "Masukkan nama Anda",
+  "emailPlaceholder": "Masukkan email Anda",
+  "messageLabel": "Pesan Anda",
+  "messagePlaceholder": "Tulis pesan Anda di sini...",
+  "submit": "Kirim Pesan"
+}

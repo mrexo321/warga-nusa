@@ -1,0 +1,47 @@
+{
+  "title": "About Us",
+  "description": {
+    "part1": "We are a professional training institution focused on developing the skills, discipline, and professionalism of future",
+    "highlight": "Indonesian Security Officers",
+    "part2": "to face modern security challenges."
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=1200&q=80",
+    "alt": "Security Training"
+  },
+  "vision": {
+    "title": "Our Vision",
+    "text": "To become Indonesia’s leading security training institution that produces highly disciplined, professional, and integrity-driven security personnel dedicated to protecting society and national assets."
+  },
+  "mission": {
+    "title": "Mission",
+    "item1": "Conduct high-quality training that meets national standards.",
+    "item2": "Build strong character, discipline, and responsibility.",
+    "item3": "Instill patriotism and a spirit of national defense.",
+    "item4": "Develop technical and leadership skills for security officers."
+  },
+  "values": {
+    "title": "Our Core Values",
+    "discipline": {
+      "title": "Discipline",
+      "desc": "Upholding discipline as the foundation of professionalism."
+    },
+    "solidarity": {
+      "title": "Solidarity",
+      "desc": "Fostering teamwork and social responsibility."
+    },
+    "dedication": {
+      "title": "Dedication",
+      "desc": "Serving wholeheartedly for public safety and order."
+    },
+    "integrity": {
+      "title": "Integrity",
+      "desc": "Upholding honesty and ethics in every action."
+    }
+  },
+  "cta": {
+    "title": "Ready to Become a Professional Security Officer?",
+    "text": "Join us and be part of the nation’s frontline guardians. We’ll train you to achieve true professionalism.",
+    "button": "Register Now"
+  }
+}

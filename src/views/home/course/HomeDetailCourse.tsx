@@ -102,7 +102,7 @@ const HomeDetailCourse = () => {
               className="bg-black/30 border border-yellow-400/10 rounded-2xl p-6 shadow-inner"
             >
               <h2 className="text-2xl font-semibold text-yellow-400 mb-3">
-                Deskripsi Kursus
+                Deskripsi Pelatihan
               </h2>
               <p className="text-gray-300 leading-relaxed">
                 {course.description}
@@ -156,7 +156,7 @@ const HomeDetailCourse = () => {
                 onClick={() => navigate("/program")}
                 className="bg-transparent border border-yellow-400/40 text-yellow-300 hover:bg-yellow-400/10 hover:border-yellow-400/60 font-semibold px-8 py-3 rounded-xl transition-all w-full sm:w-auto"
               >
-                Lihat Kursus Lainnya
+                Lihat Pelatihan Lainnya
               </button>
             </motion.div>
           </div>

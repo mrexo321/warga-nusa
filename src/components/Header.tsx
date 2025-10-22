@@ -1,31 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { ThemeContext } from "../layouts/HomeLayout";
+import { Sun, Moon } from "lucide-react";
+import Logo from "../../public/logo.png";
 
 const Header = () => {
   const { t, i18n } = useTranslation("header");
   const userSelector = useSelector((state: RootState) => state.user.token);
+  const { theme, toggleTheme } = useContext(ThemeContext);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
 
-  // Efek scroll
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 30);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Load bahasa dari localStorage
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "id";
     i18n.changeLanguage(savedLang);
   }, [i18n]);
 
-  // Saklar bahasa
   const toggleLanguage = () => {
     const newLang = i18n.language === "id" ? "en" : "id";
     i18n.changeLanguage(newLang);
@@ -36,7 +37,6 @@ const Header = () => {
     { label: t("nav.home"), path: "/" },
     { label: t("nav.about"), path: "/homeabout" },
     { label: t("nav.client"), path: "/client-porto" },
-    { label: t("nav.career"), path: "/karir" },
     { label: t("nav.contact"), path: "/contact-us" },
   ];
 
@@ -47,23 +47,33 @@ const Header = () => {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${
         isScrolled
-          ? "bg-gradient-to-r from-[#0f0f0f]/90 via-[#1a1a1a]/80 to-[#2a2a2a]/90 backdrop-blur-md border-b border-yellow-400/30 shadow-[0_4px_25px_rgba(250,204,21,0.08)]"
-          : "bg-transparent border-b border-yellow-400/10"
+          ? theme === "dark"
+            ? "bg-gradient-to-r from-[#0f0f0f]/90 via-[#1a1a1a]/80 to-[#2a2a2a]/90 backdrop-blur-md border-b border-yellow-400/30 shadow-[0_4px_25px_rgba(250,204,21,0.08)]"
+            : "bg-gradient-to-r from-white/80 via-gray-100/70 to-gray-200/80 backdrop-blur-md border-b border-yellow-400/30 shadow-[0_4px_25px_rgba(250,204,21,0.08)]"
+          : theme === "dark"
+          ? "bg-transparent border-b border-yellow-400/10"
+          : "bg-transparent border-b border-yellow-400/20"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3">
-        {/* === LOGO === */}
-        <motion.img
-          src="/assets/logo1.png"
-          alt={t("logoAlt")}
-          className="h-10 w-auto object-contain"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        />
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between py-3 relative">
+        {/* === KIRI: LOGO === */}
+        <div className="flex items-center">
+          <motion.img
+            src={Logo}
+            alt={t("logoAlt")}
+            className={`h-10 w-auto object-contain transition-all duration-500 ${
+              theme === "dark"
+                ? "mix-blend-screen brightness-125"
+                : "mix-blend-multiply brightness-100"
+            }`}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
 
-        {/* === NAV DESKTOP === */}
-        <nav className="hidden md:flex items-center space-x-8 text-sm font-medium">
+        {/* === TENGAH: NAV MENU === */}
+        <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 space-x-8 text-sm font-medium">
           {navItems.map((item, i) => {
             const isActive = location.pathname === item.path;
             return (
@@ -77,25 +87,55 @@ const Header = () => {
                   className={`relative transition-all duration-300 ${
                     isActive
                       ? "text-yellow-400"
-                      : "text-gray-300 hover:text-yellow-400"
+                      : theme === "dark"
+                      ? "text-gray-300 hover:text-yellow-400"
+                      : "text-gray-700 hover:text-yellow-600"
                   }`}
                 >
                   {item.label}
-                  <span
-                    className={`absolute bottom-0 left-0 h-[2px] rounded-full transition-all duration-300 ${
-                      isActive
-                        ? "w-full bg-yellow-400"
-                        : "w-0 bg-yellow-400 group-hover:w-full"
-                    }`}
-                  />
                 </Link>
               </motion.div>
             );
           })}
         </nav>
 
-        {/* === LANGUAGE SWITCH + USER === */}
+        {/* === KANAN: TOGGLES & LOGIN === */}
         <div className="hidden md:flex items-center space-x-5">
+          {/* Saklar Tema */}
+          <motion.button
+            onClick={toggleTheme}
+            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.08 }}
+            className={`relative w-14 h-8 flex items-center rounded-full border transition-all duration-500 overflow-hidden
+              ${
+                theme === "dark"
+                  ? "bg-gradient-to-r from-[#1a1a1a] via-[#0f0f0f] to-[#1a1a1a] border-yellow-400/40 shadow-[0_0_15px_rgba(250,204,21,0.15)]"
+                  : "bg-gradient-to-r from-yellow-100 via-yellow-200 to-amber-100 border-yellow-400/30 shadow-[0_0_15px_rgba(250,204,21,0.2)]"
+              }`}
+            title="Ganti Tema"
+          >
+            <motion.div
+              layout
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className={`absolute w-6 h-6 rounded-full flex items-center justify-center shadow-md transition-all duration-500
+                ${
+                  theme === "dark"
+                    ? "bg-yellow-400 text-slate-900 left-[5px] shadow-[0_0_10px_rgba(250,204,21,0.4)]"
+                    : "bg-yellow-500 text-white right-[5px] shadow-[0_0_10px_rgba(250,204,21,0.5)]"
+                }`}
+            >
+              {theme === "dark" ? (
+                <Sun size={14} className="animate-pulse" />
+              ) : (
+                <Moon size={14} className="animate-pulse" />
+              )}
+            </motion.div>
+            <div
+              className={`absolute inset-0 transition-all duration-700 blur-md opacity-30
+                ${theme === "dark" ? "bg-yellow-400/20" : "bg-yellow-300/50"}`}
+            />
+          </motion.button>
+
           {/* Saklar Bahasa */}
           <div
             className="relative w-16 h-8 bg-gray-600 rounded-full cursor-pointer border border-yellow-400/40 flex items-center"
@@ -127,120 +167,29 @@ const Header = () => {
           ) : (
             <Link
               to="/login"
-              className="text-gray-200 border border-yellow-400/60 px-4 py-1.5 rounded-lg hover:bg-yellow-400 hover:text-black transition"
+              className={`border border-yellow-400/60 px-4 py-1.5 rounded-lg hover:bg-yellow-400 transition ${
+                theme === "dark"
+                  ? "text-gray-200 hover:text-black"
+                  : "text-gray-800 hover:text-black"
+              }`}
             >
               {t("nav.login")}
             </Link>
           )}
         </div>
 
-        {/* === MENU BUTTON MOBILE === */}
+        {/* === MENU MOBILE === */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-gray-300 hover:text-yellow-400 transition"
+          className={`md:hidden transition ${
+            theme === "dark"
+              ? "text-gray-300 hover:text-yellow-400"
+              : "text-gray-800 hover:text-yellow-600"
+          }`}
         >
-          {menuOpen ? (
-            <svg
-              className="h-7 w-7"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          ) : (
-            <svg
-              className="h-7 w-7"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          )}
+          {menuOpen ? "✕" : "☰"}
         </button>
       </div>
-
-      {/* === MENU MOBILE === */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="md:hidden bg-gradient-to-b from-[#141414] via-[#1a1a1a] to-[#202020] border-t border-yellow-400/10 overflow-hidden"
-          >
-            <nav className="flex flex-col items-center py-6 space-y-4 text-base">
-              {navItems.map((item, i) => {
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link
-                    key={i}
-                    to={item.path}
-                    onClick={() => setMenuOpen(false)}
-                    className={`transition-colors ${
-                      isActive
-                        ? "text-yellow-400 font-semibold"
-                        : "text-gray-300 hover:text-yellow-400"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-
-              {/* Saklar Bahasa (mobile) */}
-              <div
-                className="relative w-16 h-8 bg-gray-600 rounded-full cursor-pointer border border-yellow-400/40 flex items-center mt-4"
-                onClick={toggleLanguage}
-              >
-                <motion.div
-                  layout
-                  className={`absolute w-7 h-7 rounded-full bg-yellow-400 shadow-md ${
-                    i18n.language === "id" ? "left-1" : "right-1"
-                  }`}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                />
-                <span className="absolute left-2 text-xs text-black font-bold">
-                  ID
-                </span>
-                <span className="absolute right-2 text-xs text-black font-bold">
-                  EN
-                </span>
-              </div>
-
-              {userSelector ? (
-                <Link
-                  to="/dashboard"
-                  className="border border-yellow-400 bg-yellow-400 text-black font-semibold px-5 py-2 rounded-lg hover:bg-yellow-500 transition"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {t("nav.dashboard")}
-                </Link>
-              ) : (
-                <Link
-                  to="/login"
-                  className="text-gray-200 border border-yellow-400/60 px-5 py-2 rounded-lg hover:bg-yellow-400 hover:text-black transition"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {t("nav.login")}
-                </Link>
-              )}
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.header>
   );
 };

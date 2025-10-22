@@ -1,0 +1,35 @@
+{
+  "title": "Klien & Portofolio",
+  "description": "Kami dipercaya oleh berbagai perusahaan dan institusi terkemuka untuk menyediakan pelatihan dan layanan keamanan profesional di seluruh Indonesia.",
+
+  "clientsTitle": "Klien Kami",
+  "client1_name": "PT Garda Nusantara",
+  "client1_logo": "https://via.placeholder.com/120x60?text=Garda",
+  "client2_name": "Bank Mandiri",
+  "client2_logo": "https://via.placeholder.com/120x60?text=Mandiri",
+  "client3_name": "Pertamina",
+  "client3_logo": "https://via.placeholder.com/120x60?text=Pertamina",
+  "client4_name": "PLN",
+  "client4_logo": "https://via.placeholder.com/120x60?text=PLN",
+  "client5_name": "Telkom Indonesia",
+  "client5_logo": "https://via.placeholder.com/120x60?text=Telkom",
+  "client6_name": "Angkasa Pura",
+  "client6_logo": "https://via.placeholder.com/120x60?text=AP1",
+
+  "portfolioTitle": "Portofolio Proyek Kami",
+  "portfolio1_title": "Pelatihan Satpam Bank Nasional",
+  "portfolio1_desc": "Program pelatihan keamanan profesional untuk bank besar di Jakarta.",
+  "portfolio1_img": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=900&q=80",
+
+  "portfolio2_title": "Sistem Keamanan Kawasan Industri",
+  "portfolio2_desc": "Implementasi manajemen keamanan di area pabrik dan pergudangan.",
+  "portfolio2_img": "https://images.unsplash.com/photo-1629909613983-6a68fca9564e?auto=format&fit=crop&w=900&q=80",
+
+  "portfolio3_title": "Pelatihan Satpam Event Nasional",
+  "portfolio3_desc": "Kerja sama dalam penyediaan personel keamanan untuk acara berskala besar.",
+  "portfolio3_img": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=900&q=80",
+
+  "cta_title": "Ingin Bekerja Sama Dengan Kami?",
+  "cta_text": "Kami siap memberikan solusi keamanan terbaik dan pelatihan profesional sesuai kebutuhan perusahaan Anda.",
+  "cta_button": "Hubungi Kami"
+}

@@ -1,77 +1,49 @@
-import React from "react";
+import React, { useContext } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Building2, Briefcase, Users } from "lucide-react";
-import HomeLayout from "../../../layouts/HomeLayout";
+import { ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import HomeLayout, { ThemeContext } from "../../../layouts/HomeLayout";
 
-const fadeIn = (direction = "up", delay = 0) => {
-  const variants = {
-    hidden: {
-      opacity: 0,
-      y: direction === "up" ? 40 : direction === "down" ? -40 : 0,
-      x: direction === "left" ? 40 : direction === "right" ? -40 : 0,
-    },
-    show: {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      transition: { duration: 0.6, delay },
-    },
-  };
-  return variants;
-};
+const fadeIn = (direction = "up", delay = 0) => ({
+  hidden: {
+    opacity: 0,
+    y: direction === "up" ? 40 : direction === "down" ? -40 : 0,
+    x: direction === "left" ? 40 : direction === "right" ? -40 : 0,
+  },
+  show: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    transition: { duration: 0.6, delay },
+  },
+});
 
 const ClientAndPorto = () => {
-  const clients = [
-    {
-      name: "PT Garda Nusantara",
-      logo: "https://via.placeholder.com/120x60?text=Garda",
-    },
-    {
-      name: "Bank Mandiri",
-      logo: "https://via.placeholder.com/120x60?text=Mandiri",
-    },
-    {
-      name: "Pertamina",
-      logo: "https://via.placeholder.com/120x60?text=Pertamina",
-    },
-    { name: "PLN", logo: "https://via.placeholder.com/120x60?text=PLN" },
-    {
-      name: "Telkom Indonesia",
-      logo: "https://via.placeholder.com/120x60?text=Telkom",
-    },
-    {
-      name: "Angkasa Pura",
-      logo: "https://via.placeholder.com/120x60?text=AP1",
-    },
-  ];
+  const { isDark } = useContext(ThemeContext);
+  const { t } = useTranslation("clientAndPorto");
 
-  const portfolios = [
+  // Daftar gambar security dari Pexels
+  const portfolioImages = [
     {
-      title: "Pelatihan Satpam Bank Nasional",
-      desc: "Program pelatihan keamanan profesional untuk bank besar di Jakarta.",
-      img: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=900&q=80",
+      src: "https://images.pexels.com/photos/8613848/pexels-photo-8613848.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      title: "Security Guard On Duty",
+      desc: "Petugas keamanan sedang berjaga, menunjukkan profesionalisme dan kesiapsiagaan.",
     },
     {
-      title: "Sistem Keamanan Kawasan Industri",
-      desc: "Implementasi manajemen keamanan di area pabrik dan pergudangan.",
-      img: "https://images.unsplash.com/photo-1629909613983-6a68fca9564e?auto=format&fit=crop&w=900&q=80",
+      src: "https://images.pexels.com/photos/8613871/pexels-photo-8613871.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      title: "Briefing Tim Keamanan",
+      desc: "Tim keamanan berkoordinasi sebelum patroli, menggambarkan kerja sama dan disiplin.",
     },
     {
-      title: "Pelatihan Satpam Event Nasional",
-      desc: "Kerja sama dalam penyediaan personel keamanan untuk acara berskala besar.",
-      img: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=900&q=80",
+      src: "https://images.pexels.com/photos/8613853/pexels-photo-8613853.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      title: "Patroli Malam Profesional",
+      desc: "Petugas keamanan melakukan patroli malam, menegaskan ketangguhan dan tanggung jawab.",
     },
   ];
 
   return (
     <HomeLayout>
-      <section className="relative min-h-screen text-white pt-24 pb-32 overflow-hidden bg-transparent">
-        {/* Background efek cahaya */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[400px] bg-gradient-to-b from-amber-500/10 to-transparent blur-3xl opacity-30" />
-          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-gradient-to-tl from-yellow-500/10 to-transparent blur-2xl opacity-20" />
-        </div>
-
+      <section className="relative min-h-screen pt-24 pb-32 overflow-hidden transition-colors duration-700">
         {/* Judul Halaman */}
         <motion.div
           variants={fadeIn("up", 0.2)}
@@ -79,26 +51,30 @@ const ClientAndPorto = () => {
           animate="show"
           className="relative max-w-6xl mx-auto text-center px-6"
         >
-          <h1 className="text-4xl md:text-6xl font-extrabold text-yellow-400 mb-5 drop-shadow-[0_0_10px_rgba(255,215,0,0.4)]">
-            Klien & Portofolio
+          <h1
+            className={`text-4xl md:text-6xl font-extrabold mb-5 ${
+              isDark ? "text-yellow-400" : "text-yellow-600"
+            }`}
+          >
+            {t("title")}
           </h1>
-          <p className="text-gray-300 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-            Kami dipercaya oleh berbagai perusahaan dan institusi terkemuka
-            untuk menyediakan pelatihan dan layanan keamanan profesional di
-            seluruh Indonesia.
+          <p className="text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
+            {t("description")}
           </p>
         </motion.div>
 
-        {/* Daftar Klien */}
+        {/* Klien */}
         <div className="max-w-6xl mx-auto mt-20 px-6">
           <motion.h2
             variants={fadeIn("up", 0.3)}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
-            className="text-3xl font-bold text-yellow-400 text-center mb-12"
+            className={`text-3xl font-bold text-center mb-12 ${
+              isDark ? "text-yellow-400" : "text-yellow-600"
+            }`}
           >
-            Klien Kami
+            {t("clientsTitle")}
           </motion.h2>
 
           <motion.div
@@ -108,82 +84,130 @@ const ClientAndPorto = () => {
             viewport={{ once: true }}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 justify-items-center"
           >
-            {clients.map((client, i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <motion.div
                 key={i}
                 whileHover={{ scale: 1.1 }}
-                className="p-4 bg-slate-900/60 border border-yellow-400/10 rounded-xl backdrop-blur-md shadow-md hover:border-yellow-400/40 transition-all duration-300 flex flex-col items-center justify-center"
+                className={`p-4 rounded-xl backdrop-blur-md shadow-md flex flex-col items-center justify-center transition-all duration-300 ${
+                  isDark
+                    ? "bg-slate-900/60 border border-yellow-400/10 hover:border-yellow-400/40"
+                    : "bg-white border border-yellow-300/40 hover:border-yellow-500/50 shadow-lg"
+                }`}
               >
                 <img
-                  src={client.logo}
-                  alt={client.name}
-                  className="w-24 h-12 object-contain opacity-80 hover:opacity-100 transition"
+                  src={t(`client${i}_logo`)}
+                  alt={t(`client${i}_name`)}
+                  className={`w-24 h-12 object-contain ${
+                    isDark ? "opacity-80 hover:opacity-100" : "opacity-90"
+                  }`}
                 />
-                <p className="text-xs mt-2 text-gray-400 text-center">
-                  {client.name}
+                <p
+                  className={`text-xs mt-2 text-center ${
+                    isDark ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  {t(`client${i}_name`)}
                 </p>
               </motion.div>
             ))}
           </motion.div>
         </div>
 
-        {/* Portofolio Section */}
+        {/* Portofolio */}
         <div className="max-w-6xl mx-auto mt-28 px-6">
           <motion.h2
             variants={fadeIn("up", 0.3)}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
-            className="text-3xl font-bold text-yellow-400 text-center mb-12"
+            className={`text-3xl font-bold text-center mb-12 ${
+              isDark ? "text-yellow-400" : "text-yellow-600"
+            }`}
           >
-            Portofolio Proyek Kami
+            {t("portfolioTitle")}
           </motion.h2>
 
           <div className="grid md:grid-cols-3 gap-10">
-            {portfolios.map((porto, i) => (
+            {portfolioImages.map((item, index) => (
               <motion.div
-                key={i}
+                key={index}
                 whileHover={{ scale: 1.03 }}
-                className="relative group overflow-hidden rounded-2xl border border-yellow-400/10 shadow-lg hover:border-yellow-400/30 transition"
+                className={`relative group overflow-hidden rounded-2xl transition border shadow-lg ${
+                  isDark
+                    ? "border-yellow-400/10 hover:border-yellow-400/30"
+                    : "border-yellow-300/30 hover:border-yellow-600/40 bg-white"
+                }`}
               >
                 <img
-                  src={porto.img}
-                  alt={porto.title}
+                  src={item.src}
+                  alt={item.title}
                   className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                {/* Overlay teks */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
-                  <h3 className="text-xl font-semibold text-yellow-400">
-                    {porto.title}
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-yellow-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
+                <div
+                  className={`absolute inset-0 transition-opacity duration-500 flex flex-col justify-end p-6 ${
+                    isDark
+                      ? "bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100"
+                      : "bg-gradient-to-t from-white/80 via-white/40 to-transparent opacity-0 group-hover:opacity-100"
+                  }`}
+                >
+                  <h3
+                    className={`text-xl font-semibold ${
+                      isDark ? "text-yellow-400" : "text-yellow-700"
+                    }`}
+                  >
+                    {item.title}
                   </h3>
-                  <p className="text-gray-300 text-sm mt-1">{porto.desc}</p>
+                  <p
+                    className={`text-sm mt-1 ${
+                      isDark ? "text-gray-300" : "text-gray-800"
+                    }`}
+                  >
+                    {item.desc}
+                  </p>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* CTA Section */}
+        {/* CTA */}
         <motion.div
           variants={fadeIn("up", 0.3)}
           whileInView="show"
           initial="hidden"
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto mt-28 text-center bg-gradient-to-r from-yellow-400/10 via-yellow-400/5 to-transparent border border-yellow-400/20 rounded-2xl p-10 shadow-[0_0_30px_rgba(255,215,0,0.05)] backdrop-blur-sm"
+          className={`max-w-4xl mx-auto mt-28 text-center rounded-2xl p-10 backdrop-blur-sm transition ${
+            isDark
+              ? "bg-gradient-to-r from-yellow-400/10 via-yellow-400/5 to-transparent border border-yellow-400/20 text-white"
+              : "bg-gradient-to-r from-yellow-100 via-yellow-50 to-white border border-yellow-300 text-gray-800"
+          }`}
         >
-          <h2 className="text-3xl font-bold text-yellow-400 mb-4">
-            Ingin Bekerja Sama Dengan Kami?
+          <h2
+            className={`text-3xl font-bold mb-4 ${
+              isDark ? "text-yellow-400" : "text-yellow-700"
+            }`}
+          >
+            {t("cta_title")}
           </h2>
-          <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-            Kami siap memberikan solusi keamanan terbaik dan pelatihan
-            profesional sesuai kebutuhan perusahaan Anda.
+          <p
+            className={`mb-6 max-w-2xl mx-auto ${
+              isDark ? "text-gray-300" : "text-gray-700"
+            }`}
+          >
+            {t("cta_text")}
           </p>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-gradient-to-r from-yellow-400 to-amber-400 text-slate-900 font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-[0_0_20px_rgba(255,215,0,0.4)] transition inline-flex items-center gap-2"
+            className={`font-semibold px-8 py-3 rounded-xl shadow-lg inline-flex items-center gap-2 transition ${
+              isDark
+                ? "bg-gradient-to-r from-yellow-400 to-amber-400 text-slate-900 hover:shadow-[0_0_20px_rgba(255,215,0,0.4)]"
+                : "bg-gradient-to-r from-yellow-300 to-yellow-500 text-white hover:shadow-[0_0_15px_rgba(250,204,21,0.5)]"
+            }`}
           >
-            Hubungi Kami <ArrowRight size={18} />
+            {t("cta_button")} <ArrowRight size={18} />
           </motion.button>
         </motion.div>
       </section>

@@ -16,6 +16,7 @@ import {
   Search,
   CheckCircle2,
   UserCheck,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -74,12 +75,28 @@ const AssignShift = () => {
     },
   });
 
+  // Unassign shift
+  const unassignShiftMutation = useMutation({
+    mutationFn: (payload: { userId: string; date: string }) =>
+      shiftService.unassignShift(payload),
+    onSuccess: () => {
+      toast.success("Shift berhasil dihapus!");
+      queryClient.invalidateQueries({
+        queryKey: ["user-shifts", currentYear, currentMonth],
+      });
+    },
+    onError: () => {
+      toast.error("Gagal menghapus shift!");
+    },
+  });
+
   // Sudah ditugaskan
   const assignedUsers = useMemo(() => {
     if (!userShiftData?.data?.schedules || !selectedDate) return [];
     return userShiftData.data.schedules
       .filter((s: any) => s.dailyShifts[selectedDate] !== null)
       .map((s: any) => ({
+        id: s.userId,
         name: s.name,
         shiftName: s.dailyShifts[selectedDate]?.name,
       }));
@@ -149,6 +166,8 @@ const AssignShift = () => {
     setCurrentYear(date.getFullYear());
     setCurrentMonth(date.getMonth() + 1);
   };
+
+  console.log("assigned", assignedUsers);
 
   return (
     <MainLayout>
@@ -325,10 +344,28 @@ const AssignShift = () => {
                           key={i}
                           className="flex justify-between items-center bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-lg text-slate-300 text-sm"
                         >
-                          <span>{a.name}</span>
-                          <span className="text-amber-400 font-medium">
-                            {a.shiftName}
-                          </span>
+                          <div className="flex flex-col">
+                            <span>{a.name}</span>
+                            <span className="text-amber-400 font-medium">
+                              {a.shiftName}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() =>
+                              unassignShiftMutation.mutate({
+                                userId: a.id,
+                                date: selectedDate,
+                              })
+                            }
+                            disabled={unassignShiftMutation.isPending}
+                            className="text-red-400 hover:text-red-500 transition"
+                          >
+                            {unassignShiftMutation.isPending ? (
+                              <Loader2 className="animate-spin" size={16} />
+                            ) : (
+                              <Trash2 size={16} />
+                            )}
+                          </button>
                         </li>
                       ))}
                     </ul>

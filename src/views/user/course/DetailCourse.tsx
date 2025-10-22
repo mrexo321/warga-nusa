@@ -2,7 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import MainLayout from "../../../layouts/MainLayout";
-import { Clock, Star, FileText, X, Camera, Send } from "lucide-react";
+import {
+  Clock,
+  Star,
+  FileText,
+  X,
+  Camera,
+  Send,
+  CheckCircle,
+} from "lucide-react";
 import { courseService } from "../../../services/courseService";
 import { toast } from "sonner";
 import environment from "../../../config/environment";
@@ -24,7 +32,7 @@ const DetailCourse = () => {
   const [manualCode, setManualCode] = useState("");
   const [readerId] = useState("qr-reader-container");
 
-  // === Fungsi untuk ambil lokasi pengguna ===
+  // === Fungsi ambil lokasi pengguna ===
   const getCurrentLocation = (): Promise<{
     latitude: string;
     longitude: string;
@@ -47,6 +55,17 @@ const DetailCourse = () => {
     });
   };
 
+  // === MUTATION APPLY COURSE ===
+  const applyMutation = useMutation({
+    mutationFn: () => courseService.applyCourse(id!),
+    onSuccess: () => {
+      toast.success("Kursus berhasil di-apply!");
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Gagal apply kursus");
+    },
+  });
+
   // === MUTATION ABSENSI ===
   const attendanceMutation = useMutation({
     mutationFn: (payload: {
@@ -58,7 +77,6 @@ const DetailCourse = () => {
       toast.success("Absensi berhasil!");
       setManualCode("");
     },
-
     onError: (err: any) => {
       toast.error(err.response?.data?.message || "Absensi gagal");
     },
@@ -68,14 +86,14 @@ const DetailCourse = () => {
   useEffect(() => {
     if (!scanning) return;
     const html5QrCode = new Html5Qrcode(readerId);
-    let alreadyScanned = false; // 🟢 Tambahkan flag
+    let alreadyScanned = false;
 
     html5QrCode
       .start(
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 250, height: 250 } },
         async (decodedText) => {
-          if (alreadyScanned) return; // 🛑 Abaikan hasil scan berikutnya
+          if (alreadyScanned) return;
           alreadyScanned = true;
 
           if (selectedMeeting) {
@@ -86,10 +104,10 @@ const DetailCourse = () => {
                 latitude: location.latitude,
                 longitude: location.longitude,
               });
-              setScanning(false); // Tutup modal kamera
+              setScanning(false);
             } catch (error) {
               toast.error("Gagal mengambil lokasi. Aktifkan izin lokasi.");
-              alreadyScanned = false; // izinkan ulang jika error lokasi
+              alreadyScanned = false;
             }
           }
         },
@@ -99,7 +117,6 @@ const DetailCourse = () => {
         toast.error("Gagal membuka kamera: " + err);
       });
 
-    // 🔴 Cleanup tunggal
     return () => {
       html5QrCode.stop().catch(() => {});
     };
@@ -152,6 +169,51 @@ const DetailCourse = () => {
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Tombol Apply Course */}
+          <div className="flex justify-start">
+            <button
+              onClick={() => applyMutation.mutate()}
+              disabled={applyMutation.isPending}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg
+                ${
+                  applyMutation.isPending
+                    ? "bg-slate-700 text-slate-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:opacity-90"
+                }`}
+            >
+              {applyMutation.isPending ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"
+                    ></path>
+                  </svg>
+                  Applying...
+                </>
+              ) : (
+                <>
+                  <CheckCircle size={18} />
+                  Apply Course
+                </>
+              )}
+            </button>
           </div>
 
           {/* Deskripsi */}

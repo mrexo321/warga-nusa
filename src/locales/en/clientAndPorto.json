@@ -1,0 +1,35 @@
+{
+  "title": "Clients & Portfolio",
+  "description": "We are trusted by leading companies and institutions to provide professional security training and services across Indonesia.",
+
+  "clientsTitle": "Our Clients",
+  "client1_name": "PT Garda Nusantara",
+  "client1_logo": "https://via.placeholder.com/120x60?text=Garda",
+  "client2_name": "Bank Mandiri",
+  "client2_logo": "https://via.placeholder.com/120x60?text=Mandiri",
+  "client3_name": "Pertamina",
+  "client3_logo": "https://via.placeholder.com/120x60?text=Pertamina",
+  "client4_name": "PLN",
+  "client4_logo": "https://via.placeholder.com/120x60?text=PLN",
+  "client5_name": "Telkom Indonesia",
+  "client5_logo": "https://via.placeholder.com/120x60?text=Telkom",
+  "client6_name": "Angkasa Pura",
+  "client6_logo": "https://via.placeholder.com/120x60?text=AP1",
+
+  "portfolioTitle": "Our Project Portfolio",
+  "portfolio1_title": "National Bank Security Training",
+  "portfolio1_desc": "A professional security training program for major banks in Jakarta.",
+  "portfolio1_img": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=900&q=80",
+
+  "portfolio2_title": "Industrial Area Security System",
+  "portfolio2_desc": "Implementation of security management in factory and warehouse areas.",
+  "portfolio2_img": "https://images.unsplash.com/photo-1629909613983-6a68fca9564e?auto=format&fit=crop&w=900&q=80",
+
+  "portfolio3_title": "National Event Security Training",
+  "portfolio3_desc": "Collaboration in providing trained security personnel for large-scale events.",
+  "portfolio3_img": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=900&q=80",
+
+  "cta_title": "Want to Collaborate With Us?",
+  "cta_text": "We are ready to provide the best security solutions and professional training tailored to your company’s needs.",
+  "cta_button": "Contact Us"
+}

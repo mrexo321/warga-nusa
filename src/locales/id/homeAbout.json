@@ -1,0 +1,47 @@
+{
+  "title": "Tentang Kami",
+  "description": {
+    "part1": "Kami adalah lembaga pelatihan profesional yang berfokus pada pengembangan kemampuan, kedisiplinan, dan profesionalitas calon",
+    "highlight": "Satpam Indonesia",
+    "part2": "agar siap menghadapi tantangan keamanan modern."
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=1200&q=80",
+    "alt": "Pelatihan Satpam"
+  },
+  "vision": {
+    "title": "Visi Kami",
+    "text": "Menjadi lembaga pelatihan satpam terdepan di Indonesia yang mampu mencetak personel keamanan berintegritas tinggi, disiplin, dan profesional dalam melindungi masyarakat serta aset bangsa."
+  },
+  "mission": {
+    "title": "Misi",
+    "item1": "Menyelenggarakan pelatihan berkualitas sesuai standar nasional.",
+    "item2": "Membentuk karakter tangguh, berdisiplin, dan bertanggung jawab.",
+    "item3": "Menanamkan nilai cinta tanah air dan bela negara.",
+    "item4": "Mengembangkan kemampuan teknis dan kepemimpinan satpam."
+  },
+  "values": {
+    "title": "Nilai-Nilai Utama Kami",
+    "discipline": {
+      "title": "Disiplin",
+      "desc": "Menegakkan kedisiplinan sebagai fondasi utama profesionalitas."
+    },
+    "solidarity": {
+      "title": "Solidaritas",
+      "desc": "Menumbuhkan rasa kebersamaan dan tanggung jawab sosial."
+    },
+    "dedication": {
+      "title": "Dedikasi",
+      "desc": "Mengabdi sepenuh hati untuk keamanan dan ketertiban masyarakat."
+    },
+    "integrity": {
+      "title": "Integritas",
+      "desc": "Menjunjung tinggi kejujuran dan etika dalam setiap tindakan."
+    }
+  },
+  "cta": {
+    "title": "Siap Menjadi Satpam Profesional?",
+    "text": "Bergabunglah bersama kami dan jadilah bagian dari garda terdepan penjaga keamanan bangsa. Kami siap melatih Anda menuju profesionalitas sejati.",
+    "button": "Daftar Sekarang"
+  }
+}

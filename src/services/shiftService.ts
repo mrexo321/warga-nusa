@@ -14,7 +14,7 @@ export const shiftService = {
   },
 
   async applyShift(data: shiftData) {
-    const response = await axiosInstance.post("/user/apply-shift", data);
+    const response = await axiosInstance.post("/user/assign-shift", data);
     return response.data;
   },
 
@@ -45,6 +45,11 @@ export const shiftService = {
 
   async deleteShift(shiftId: string) {
     const response = await axiosInstance.delete(`/shift/${shiftId}`);
+    return response.data;
+  },
+
+  async unassignShift(payload: { date: string; userId: string }) {
+    const response = await axiosInstance.post("/user/unassign-shift", payload);
     return response.data;
   },
 };

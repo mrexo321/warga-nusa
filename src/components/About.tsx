@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import StatsCard from "./StatsCard";
+import { ThemeContext } from "../layouts/HomeLayout";
 
 const About = () => {
   const { t } = useTranslation("about");
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === "dark";
 
   const stats = [
     {
@@ -88,7 +91,9 @@ const About = () => {
   return (
     <section
       id="about"
-      className="relative bg-transparent text-white py-24 overflow-hidden"
+      className={`relative py-24 overflow-hidden transition-colors duration-700 ${
+        isDark ? "bg-transparent text-white" : "bg-transparent text-gray-900"
+      }`}
     >
       {/* Header */}
       <motion.div
@@ -97,10 +102,20 @@ const About = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-4xl md:text-5xl font-extrabold mb-6 bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent drop-shadow-lg">
+        <h2
+          className={`text-4xl md:text-5xl font-extrabold mb-6 bg-gradient-to-r ${
+            isDark
+              ? "from-yellow-400 to-amber-500"
+              : "from-yellow-500 to-amber-600"
+          } bg-clip-text text-transparent drop-shadow-lg`}
+        >
           {t("title", { brand: "WargaNusa" })}
         </h2>
-        <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+        <p
+          className={`text-lg max-w-3xl mx-auto leading-relaxed transition-colors duration-700 ${
+            isDark ? "text-gray-300" : "text-gray-600"
+          }`}
+        >
           {t("description", { brand: "Wajrasena Garda Nusantara (WargaNusa)" })}
         </p>
       </motion.div>
@@ -117,10 +132,12 @@ const About = () => {
             key={i}
             whileHover={{ scale: 1.07 }}
             transition={{ type: "spring", stiffness: 180 }}
-            className="relative bg-gradient-to-b from-zinc-900/80 via-slate-900/80 to-black/90
-                       border border-slate-800/70 rounded-2xl shadow-md
-                       hover:shadow-yellow-400/30 overflow-hidden
-                       group transition-all duration-500 hover:-translate-y-2"
+            className={`relative rounded-2xl shadow-md overflow-hidden group transition-all duration-500 hover:-translate-y-2 border
+              ${
+                isDark
+                  ? "bg-gradient-to-b from-[#1E1E1E]/90 via-[#141414]/90 to-black/95 border-slate-800/70 hover:shadow-yellow-400/30"
+                  : "bg-gradient-to-b from-white via-gray-50 to-gray-100 border-gray-200 hover:shadow-yellow-500/30"
+              }`}
           >
             <div className="absolute inset-0 rounded-2xl ring-1 ring-yellow-400/0 group-hover:ring-yellow-400/20 transition-all duration-700" />
             <StatsCard
@@ -134,34 +151,56 @@ const About = () => {
 
       {/* Image Section */}
       <motion.div
-        className="relative rounded-3xl overflow-hidden max-w-6xl mx-auto group shadow-[0_0_25px_rgba(255,215,0,0.05)] "
+        className={`relative rounded-3xl overflow-hidden max-w-6xl mx-auto group shadow-[0_0_25px_rgba(255,215,0,0.05)] ${
+          isDark ? "border border-slate-800/50" : "border border-gray-200/70"
+        }`}
         initial={{ opacity: 0, scale: 0.95 }}
         whileInView={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.7 }}
       >
         <img
-          src="https://images.unsplash.com/photo-1526406915894-6c5e3b8c7c5d?auto=format&fit=crop&w=1600&q=80"
-          alt="Security Training"
+          src="https://images.pexels.com/photos/8613848/pexels-photo-8613848.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&dpr=1"
+          alt="Security Officer Training - Wajrasena Garda Nusantara"
           className="w-full object-cover h-[450px] md:h-[550px] transform group-hover:scale-110 transition-all duration-700"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
+        <div
+          className={`absolute inset-0 bg-gradient-to-t ${
+            isDark
+              ? "from-black/90 via-black/40 to-transparent"
+              : "from-white/80 via-white/20 to-transparent"
+          }`}
+        />
 
         <motion.div
-          className="absolute bottom-0 left-0 p-8 md:p-14 text-left text-white"
+          className="absolute bottom-0 left-0 p-8 md:p-14 text-left"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h3 className="text-3xl md:text-4xl font-bold mb-3 text-yellow-400 drop-shadow-lg">
+          <h3
+            className={`text-3xl md:text-4xl font-bold mb-3 drop-shadow-lg ${
+              isDark ? "text-yellow-400" : "text-yellow-600"
+            }`}
+          >
             {t("imageSection.title")}
           </h3>
-          <p className="text-gray-300 text-lg max-w-xl leading-relaxed">
+          <p
+            className={`text-lg max-w-xl leading-relaxed transition-colors duration-700 ${
+              isDark ? "text-gray-300" : "text-gray-700"
+            }`}
+          >
             {t("imageSection.text")}
           </p>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="mt-6 px-7 py-3 bg-yellow-500/90 text-black font-semibold rounded-xl shadow-lg hover:shadow-yellow-400/40 transition-all duration-300 inline-flex items-center gap-2"
+            className={`mt-6 px-7 py-3 font-semibold rounded-xl shadow-lg inline-flex items-center gap-2 transition-all duration-300 border
+              ${
+                isDark
+                  ? "bg-yellow-500/90 text-black hover:bg-yellow-400 border-yellow-400/30"
+                  : "bg-yellow-500 text-white hover:bg-yellow-400 border-yellow-500/30"
+              }`}
           >
             {t("imageSection.button")}
             <svg
@@ -181,6 +220,33 @@ const About = () => {
           </motion.button>
         </motion.div>
       </motion.div>
+
+      {/* Partikel Cahaya */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {[...Array(10)].map((_, i) => (
+          <motion.span
+            key={i}
+            className={`absolute rounded-full ${
+              isDark ? "bg-yellow-400/30" : "bg-yellow-500/40"
+            }`}
+            style={{
+              width: Math.random() * 6 + 4,
+              height: Math.random() * 6 + 4,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -15, 0],
+              opacity: [0.4, 1, 0.4],
+            }}
+            transition={{
+              duration: Math.random() * 4 + 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
     </section>
   );
 };

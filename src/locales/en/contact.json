@@ -1,0 +1,18 @@
+{
+  "title": "Contact Us",
+  "description": "We are ready to assist you. Please reach out for more information about training, partnerships, or consultation services.",
+  "contactInfo": "Contact Information",
+  "addressLabel": "Address",
+  "addressValue": "Jl. Veteran No.45, Kedung Waringin, Bekasi, West Java",
+  "phoneLabel": "Phone",
+  "phoneValue": "(+62) 812-3456-7890",
+  "emailLabel": "Email",
+  "emailValue": "info@lembagapelatihan.id",
+  "formTitle": "Send Message",
+  "nameLabel": "Full Name",
+  "namePlaceholder": "Enter your name",
+  "emailPlaceholder": "Enter your email",
+  "messageLabel": "Your Message",
+  "messagePlaceholder": "Write your message here...",
+  "submit": "Send Message"
+}

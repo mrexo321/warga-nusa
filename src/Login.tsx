@@ -71,7 +71,7 @@ const Login = () => {
             transition={{ delay: 0.2 }}
             className="text-3xl font-bold text-yellow-400 tracking-wide mb-2"
           >
-            WargaNusa
+            WajraSena
           </motion.h1>
           <p className="text-gray-400 text-sm">Masuk ke akun Anda</p>
         </div>

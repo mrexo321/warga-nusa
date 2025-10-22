@@ -1,33 +1,43 @@
-import React from "react";
+import React, { useContext } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, Send } from "lucide-react";
-import HomeLayout from "../../../layouts/HomeLayout";
+import HomeLayout, { ThemeContext } from "../../../layouts/HomeLayout";
+import { useTranslation } from "react-i18next";
 
-const fadeIn = (direction = "up", delay = 0) => {
-  const variants = {
-    hidden: {
-      opacity: 0,
-      y: direction === "up" ? 40 : direction === "down" ? -40 : 0,
-      x: direction === "left" ? 40 : direction === "right" ? -40 : 0,
-    },
-    show: {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      transition: { duration: 0.6, delay },
-    },
-  };
-  return variants;
-};
+const fadeIn = (direction = "up", delay = 0) => ({
+  hidden: {
+    opacity: 0,
+    y: direction === "up" ? 40 : direction === "down" ? -40 : 0,
+    x: direction === "left" ? 40 : direction === "right" ? -40 : 0,
+  },
+  show: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    transition: { duration: 0.6, delay },
+  },
+});
 
 const ContactUs = () => {
+  const { t } = useTranslation("contact");
+  const { isDark } = useContext(ThemeContext);
+
   return (
     <HomeLayout>
-      <section className="relative min-h-screen text-white pt-24 pb-32 overflow-hidden bg-transparent">
+      <section className="relative min-h-screen pt-24 pb-32 overflow-hidden transition-colors duration-700">
         {/* Efek cahaya background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-[400px] bg-gradient-to-b from-yellow-400/10 to-transparent blur-3xl opacity-40" />
-          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-gradient-to-tl from-yellow-500/10 to-transparent blur-2xl opacity-30" />
+        <div className="absolute inset-0 pointer-events-none">
+          {isDark ? (
+            <>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-[400px] bg-yellow-400/10 blur-3xl opacity-40" />
+              <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-yellow-500/10 blur-2xl opacity-30" />
+            </>
+          ) : (
+            <>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-[400px] bg-yellow-300/20 blur-3xl opacity-50" />
+              <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-yellow-400/10 blur-2xl opacity-40" />
+            </>
+          )}
         </div>
 
         {/* Judul Halaman */}
@@ -37,12 +47,15 @@ const ContactUs = () => {
           animate="show"
           className="relative text-center max-w-4xl mx-auto px-6"
         >
-          <h1 className="text-4xl md:text-6xl font-extrabold text-yellow-400 mb-5 drop-shadow-[0_0_10px_rgba(255,215,0,0.4)]">
-            Hubungi Kami
+          <h1
+            className={`text-4xl text-white md:text-6xl font-extrabold mb-5 ${
+              isDark ? "" : "text-yellow-600"
+            }`}
+          >
+            {t("title")}
           </h1>
-          <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
-            Kami siap membantu Anda. Silakan hubungi kami untuk informasi lebih
-            lanjut mengenai pelatihan, kerja sama, atau konsultasi layanan.
+          <p className={`text-lg md:text-xl leading-relaxed`}>
+            {t("description")}
           </p>
         </motion.div>
 
@@ -56,46 +69,89 @@ const ContactUs = () => {
             viewport={{ once: true }}
             className="space-y-8"
           >
-            <h2 className="text-3xl font-bold text-yellow-400 mb-6">
-              Informasi Kontak
+            <h2
+              className={`text-3xl font-bold mb-6 ${
+                isDark ? "text-yellow-400" : "text-yellow-600"
+              }`}
+            >
+              {t("contactInfo")}
             </h2>
+
             <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-yellow-400/10 border border-yellow-400/30 rounded-xl">
-                  <MapPin className="text-yellow-400" size={24} />
-                </div>
+              {/* Alamat */}
+              <div
+                className={`flex items-start gap-4 p-4 rounded-xl transition-all duration-300 ${
+                  isDark
+                    ? "bg-slate-900/60 border-yellow-400/10 hover:border-yellow-400/40"
+                    : "bg-white border-yellow-300/40 hover:border-yellow-500/50 shadow-lg"
+                }`}
+              >
+                <MapPin
+                  className={isDark ? "text-yellow-400" : "text-yellow-600"}
+                  size={24}
+                />
                 <div>
-                  <h3 className="font-semibold text-yellow-400 text-lg">
-                    Alamat
+                  <h3
+                    className={`font-semibold text-lg ${
+                      isDark ? "text-yellow-400" : "text-yellow-600"
+                    }`}
+                  >
+                    {t("addressLabel")}
                   </h3>
-                  <p className="text-gray-300 text-sm">
-                    Jl. Veteran No.45, Kedung Waringin, Bekasi, Jawa Barat
+                  <p className={isDark ? "text-gray-300" : "text-gray-700"}>
+                    {t("addressValue")}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-yellow-400/10 border border-yellow-400/30 rounded-xl">
-                  <Phone className="text-yellow-400" size={24} />
-                </div>
+              {/* Telepon */}
+              <div
+                className={`flex items-start gap-4 p-4 rounded-xl border transition-all duration-300 ${
+                  isDark
+                    ? "bg-slate-900/60 border-yellow-400/10 hover:border-yellow-400/40"
+                    : "bg-white border-yellow-300/40 hover:border-yellow-500/50 shadow-lg"
+                }`}
+              >
+                <Phone
+                  className={isDark ? "text-yellow-400" : "text-yellow-600"}
+                  size={24}
+                />
                 <div>
-                  <h3 className="font-semibold text-yellow-400 text-lg">
-                    Telepon
+                  <h3
+                    className={`font-semibold text-lg ${
+                      isDark ? "text-yellow-400" : "text-yellow-600"
+                    }`}
+                  >
+                    {t("phoneLabel")}
                   </h3>
-                  <p className="text-gray-300 text-sm">(+62) 812-3456-7890</p>
+                  <p className={isDark ? "text-gray-300" : "text-gray-700"}>
+                    {t("phoneValue")}
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-yellow-400/10 border border-yellow-400/30 rounded-xl">
-                  <Mail className="text-yellow-400" size={24} />
-                </div>
+              {/* Email */}
+              <div
+                className={`flex items-start gap-4 p-4 rounded-xl border transition-all duration-300 ${
+                  isDark
+                    ? "bg-slate-900/60 border-yellow-400/10 hover:border-yellow-400/40"
+                    : "bg-white border-yellow-300/40 hover:border-yellow-500/50 shadow-lg"
+                }`}
+              >
+                <Mail
+                  className={isDark ? "text-yellow-400" : "text-yellow-600"}
+                  size={24}
+                />
                 <div>
-                  <h3 className="font-semibold text-yellow-400 text-lg">
-                    Email
+                  <h3
+                    className={`font-semibold text-lg ${
+                      isDark ? "text-yellow-400" : "text-yellow-600"
+                    }`}
+                  >
+                    {t("emailLabel")}
                   </h3>
-                  <p className="text-gray-300 text-sm">
-                    info@lembagapelatihan.id
+                  <p className={isDark ? "text-gray-300" : "text-gray-700"}>
+                    {t("emailValue")}
                   </p>
                 </div>
               </div>
@@ -106,7 +162,11 @@ const ContactUs = () => {
               variants={fadeIn("up", 0.4)}
               whileInView="show"
               viewport={{ once: true }}
-              className="rounded-2xl overflow-hidden border border-yellow-400/10 shadow-lg mt-10"
+              className={`rounded-2xl overflow-hidden border mt-10 shadow-lg ${
+                isDark
+                  ? "border-yellow-400/10"
+                  : "border-yellow-300/40 bg-white"
+              }`}
             >
               <iframe
                 title="Lokasi Kami"
@@ -116,7 +176,6 @@ const ContactUs = () => {
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
               ></iframe>
             </motion.div>
           </motion.div>
@@ -128,46 +187,89 @@ const ContactUs = () => {
             whileInView="show"
             viewport={{ once: true }}
             onSubmit={(e) => e.preventDefault()}
-            className="bg-slate-900/60 border border-yellow-400/10 backdrop-blur-md rounded-2xl p-8 shadow-xl space-y-6"
+            className={`rounded-2xl p-8 shadow-xl space-y-6 backdrop-blur-md transition-all duration-500 ${
+              isDark
+                ? "bg-slate-900/60 border border-yellow-400/10"
+                : "bg-white border border-yellow-300/40"
+            }`}
           >
-            <h2 className="text-2xl font-bold text-yellow-400 mb-4">
-              Kirim Pesan
+            <h2
+              className={`text-2xl font-bold mb-4 ${
+                isDark ? "text-yellow-400" : "text-yellow-600"
+              }`}
+            >
+              {t("formTitle")}
             </h2>
+
+            {/* Input */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
-                Nama Lengkap
+              <label
+                className={`block text-sm mb-2 ${
+                  isDark ? "text-gray-400" : "text-gray-700"
+                }`}
+              >
+                {t("nameLabel")}
               </label>
               <input
                 type="text"
-                placeholder="Masukkan nama Anda"
-                className="w-full px-4 py-3 rounded-lg bg-slate-800/80 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-400/40 text-gray-200 placeholder-gray-500 transition"
+                placeholder={t("namePlaceholder")}
+                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition ${
+                  isDark
+                    ? "bg-slate-800/80 border-slate-700 text-gray-200 focus:ring-yellow-400/40"
+                    : "bg-white border-yellow-200 text-gray-800 focus:ring-yellow-500/30"
+                }`}
               />
             </div>
+
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Email</label>
+              <label
+                className={`block text-sm mb-2 ${
+                  isDark ? "text-gray-400" : "text-gray-700"
+                }`}
+              >
+                Email
+              </label>
               <input
                 type="email"
-                placeholder="Masukkan email Anda"
-                className="w-full px-4 py-3 rounded-lg bg-slate-800/80 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-400/40 text-gray-200 placeholder-gray-500 transition"
+                placeholder={t("emailPlaceholder")}
+                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition ${
+                  isDark
+                    ? "bg-slate-800/80 border-slate-700 text-gray-200 focus:ring-yellow-400/40"
+                    : "bg-white border-yellow-200 text-gray-800 focus:ring-yellow-500/30"
+                }`}
               />
             </div>
+
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
-                Pesan Anda
+              <label
+                className={`block text-sm mb-2 ${
+                  isDark ? "text-gray-400" : "text-gray-700"
+                }`}
+              >
+                {t("messageLabel")}
               </label>
               <textarea
                 rows={4}
-                placeholder="Tulis pesan Anda di sini..."
-                className="w-full px-4 py-3 rounded-lg bg-slate-800/80 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-400/40 text-gray-200 placeholder-gray-500 transition"
+                placeholder={t("messagePlaceholder")}
+                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition ${
+                  isDark
+                    ? "bg-slate-800/80 border-slate-700 text-gray-200 focus:ring-yellow-400/40"
+                    : "bg-white border-yellow-200 text-gray-800 focus:ring-yellow-500/30"
+                }`}
               ></textarea>
             </div>
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-full bg-gradient-to-r from-yellow-400 to-amber-400 text-slate-900 font-semibold py-3 rounded-lg shadow-lg hover:shadow-[0_0_20px_rgba(255,215,0,0.4)] flex items-center justify-center gap-2 transition"
+              className={`w-full font-semibold py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 transition ${
+                isDark
+                  ? "bg-gradient-to-r from-yellow-400 to-amber-400 text-slate-900 hover:shadow-[0_0_20px_rgba(255,215,0,0.4)]"
+                  : "bg-gradient-to-r from-yellow-300 to-yellow-500 text-white hover:shadow-[0_0_15px_rgba(250,204,21,0.5)]"
+              }`}
             >
               <Send size={18} />
-              Kirim Pesan
+              {t("submit")}
             </motion.button>
           </motion.form>
         </div>
