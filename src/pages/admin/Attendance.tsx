@@ -7,6 +7,7 @@ import {
   Users,
   Search,
   BarChart3,
+  Calendar,
 } from "lucide-react";
 import {
   BarChart,
@@ -23,12 +24,14 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { attendanceService } from "../../services/attendanceService";
 
 const Attendance = () => {
+  const today = new Date().toISOString().split("T")[0]; // format YYYY-MM-DD
   const [search, setSearch] = useState("");
   const [showRekap, setShowRekap] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(today);
 
   const { data } = useSuspenseQuery({
-    queryKey: ["todayAttendances"],
-    queryFn: attendanceService.todayAttendance,
+    queryKey: ["todayAttendances", selectedDate],
+    queryFn: () => attendanceService.todayAttendance(selectedDate),
   });
 
   const todayAttendances = data?.data || [];
@@ -71,7 +74,7 @@ const Attendance = () => {
       else grouped[date].absen++;
     });
 
-    return Object.values(grouped).slice(-7); // ambil 7 hari terakhir
+    return Object.values(grouped).slice(-7);
   };
 
   const rekapData = generateDailyRekap(todayAttendances);
@@ -84,23 +87,39 @@ const Attendance = () => {
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0"
+          className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0"
         >
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
             Kehadiran Personel
           </h1>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowRekap((prev) => !prev)}
-            className="flex items-center gap-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-300"
-          >
-            <BarChart3 size={18} />
-            <span>
-              {showRekap ? "Tutup Rekap Harian" : "Lihat Rekap Harian"}
-            </span>
-          </motion.button>
+          {/* Date Picker + Rekap Button */}
+          <div className="flex flex-col sm:flex-row gap-3 items-center">
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              className="relative flex items-center bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 shadow-md hover:border-amber-400/60 transition"
+            >
+              <Calendar size={18} className="text-amber-400 mr-2" />
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="bg-transparent text-slate-200 outline-none cursor-pointer appearance-none"
+              />
+            </motion.div>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowRekap((prev) => !prev)}
+              className="flex items-center gap-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-300"
+            >
+              <BarChart3 size={18} />
+              <span>
+                {showRekap ? "Tutup Rekap Harian" : "Lihat Rekap Harian"}
+              </span>
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Statistik Ringkas */}

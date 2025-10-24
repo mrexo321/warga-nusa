@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import MainLayout from "../../layouts/MainLayout";
-import { Search, Plus, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, AlertTriangle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,7 @@ import { userService } from "../../services/userService";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-// ✅ Schema terpisah
+// ✅ Schema
 const createUserSchema = z.object({
   name: z.string().min(3, "Nama minimal 3 karakter"),
   username: z.string().min(3, "Username minimal 3 karakter"),
@@ -31,7 +31,11 @@ const ManagementUser = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
 
-  // ✅ Fetch user list
+  // 🧩 tambahan state konfirmasi
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+
+  // ✅ Query users
   const {
     data: users = [],
     isLoading,
@@ -70,17 +74,18 @@ const ManagementUser = () => {
     onError: () => toast.error("Gagal memperbarui pengguna."),
   });
 
-  // ✅ Hapus user
+  // ✅ Delete user
   const deleteUser = useMutation({
     mutationFn: async (id: number) => await userService.delete(id),
     onSuccess: () => {
       toast.success("Pengguna berhasil dihapus!");
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      setIsConfirmOpen(false);
     },
     onError: () => toast.error("Gagal menghapus pengguna."),
   });
 
-  // ✅ Hook form dinamis tergantung mode
+  // ✅ Hook form
   const {
     register,
     handleSubmit,
@@ -90,7 +95,7 @@ const ManagementUser = () => {
     resolver: zodResolver(editingUser ? updateUserSchema : createUserSchema),
   });
 
-  // ✅ Filter pencarian
+  // ✅ Filter search
   const filteredUsers = users.filter(
     (u: any) =>
       u.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -98,17 +103,20 @@ const ManagementUser = () => {
       u.email?.toLowerCase().includes(search.toLowerCase())
   );
 
-  // ✅ Saat klik edit
+  // ✅ Edit handler
   const handleEdit = (user: any) => {
     setEditingUser(user);
-    reset({
-      name: user.name,
-      email: user.email,
-    });
+    reset({ name: user.name, email: user.email });
     setIsOpen(true);
   };
 
-  // ✅ Saat submit form
+  // ✅ Hapus handler (buka konfirmasi)
+  const handleDeleteClick = (user: any) => {
+    setSelectedUser(user);
+    setIsConfirmOpen(true);
+  };
+
+  // ✅ Submit form
   const onSubmit = (data: any) => {
     if (editingUser) {
       updateUser.mutate({
@@ -186,7 +194,7 @@ const ManagementUser = () => {
                         <Edit size={16} className="text-cyan-400" />
                       </button>
                       <button
-                        onClick={() => deleteUser.mutate(user.id)}
+                        onClick={() => handleDeleteClick(user)}
                         className="p-2 rounded-lg bg-slate-700/50 hover:bg-red-500/20 transition"
                       >
                         <Trash2 size={16} className="text-red-400" />
@@ -337,6 +345,59 @@ const ManagementUser = () => {
                     </motion.button>
                   </div>
                 </form>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 🌟 Modal Konfirmasi Hapus */}
+        <AnimatePresence>
+          {isConfirmOpen && selectedUser && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/70"
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 30 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/70 border border-red-400/30 rounded-2xl shadow-[0_0_30px_rgba(248,113,113,0.25)] p-6 w-full max-w-sm text-center"
+              >
+                <div className="flex justify-center mb-3">
+                  <AlertTriangle className="text-red-400" size={48} />
+                </div>
+                <h3 className="text-lg font-bold text-red-400 mb-2">
+                  Konfirmasi Hapus
+                </h3>
+                <p className="text-slate-300 text-sm mb-5">
+                  Apakah kamu yakin ingin menghapus{" "}
+                  <span className="font-semibold text-white">
+                    {selectedUser.name}
+                  </span>
+                  ? Tindakan ini tidak dapat dibatalkan.
+                </p>
+                <div className="flex justify-center gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsConfirmOpen(false)}
+                    className="px-4 py-2 rounded-lg bg-slate-700/60 text-slate-300 border border-slate-600 hover:bg-slate-600/60 transition"
+                  >
+                    Batal
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => deleteUser.mutate(selectedUser.id)}
+                    disabled={deleteUser.isPending}
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-400 to-pink-500 text-slate-900 font-semibold shadow-[0_0_15px_rgba(248,113,113,0.4)] hover:shadow-[0_0_25px_rgba(248,113,113,0.5)] transition disabled:opacity-60"
+                  >
+                    {deleteUser.isPending ? "Menghapus..." : "Hapus"}
+                  </motion.button>
+                </div>
               </motion.div>
             </motion.div>
           )}

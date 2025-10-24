@@ -7,7 +7,12 @@
     "career": "Career",
     "contact": "Contact Us",
     "login": "Log in",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "more": "Other",
+    "light": "Light",
+    "dark": "Dark",
+    "switchToId": "Switch Language",
+    "switchToEn": "Switch Language"
   },
   "language": {
     "id": "🇮🇩 ID",

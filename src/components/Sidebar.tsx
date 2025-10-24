@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import type { RootState } from "../store/store";
 import { X, LogOut } from "lucide-react";
 
+import Logo from "../../public/logo.png";
+
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
@@ -62,14 +64,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="p-6 border-b border-slate-700/40 flex items-center justify-between sticky top-0 bg-[#0d1117] z-10">
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-lg shadow-lg">
-              <svg
-                className="w-6 h-6 text-slate-900"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 7C13.4 7 14.8 8.6 14.8 10V11.2C15.2 11.2 15.7 11.7 15.7 12.2V16.7C15.7 17.2 15.2 17.7 14.8 17.7H9.2C8.7 17.7 8.2 17.2 8.2 16.7V12.2C8.2 11.7 8.7 11.2 9.2 11.2V10C9.2 8.6 10.6 7 12 7ZM12 8.2C11.2 8.2 10.5 8.9 10.5 9.7V11.2H13.5V9.7C13.5 8.9 12.8 8.2 12 8.2Z" />
-              </svg>
+            <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-lg shadow-lg flex items-center justify-center">
+              <img
+                src={Logo}
+                alt="WajraSena Logo"
+                className="h-8 w-auto object-contain"
+              />
             </div>
             <h1 className="text-lg font-semibold text-white tracking-wide">
               WajraSena

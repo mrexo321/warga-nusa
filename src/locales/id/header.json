@@ -7,7 +7,12 @@
     "career": "Karier",
     "contact": "Kontak Kami",
     "login": "Masuk",
-    "dashboard": "Dasbor"
+    "dashboard": "Dasbor",
+    "more": "Lainnya",
+    "light": "Terang",
+    "dark": "Gelap",
+    "switchToId": "Ganti Bahasa",
+    "switchToEn": "Ganti Bahasa"
   },
   "language": {
     "id": "🇮🇩 ID",

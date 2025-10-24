@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import HomeLayout, { ThemeContext } from "../../../layouts/HomeLayout";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const fadeIn = (direction = "up", delay = 0) => ({
   hidden: {
@@ -21,6 +22,8 @@ const fadeIn = (direction = "up", delay = 0) => ({
 const ClientAndPorto = () => {
   const { isDark } = useContext(ThemeContext);
   const { t } = useTranslation("clientAndPorto");
+
+  const navigate = useNavigate();
 
   // Daftar gambar security dari Pexels
   const portfolioImages = [
@@ -199,6 +202,7 @@ const ClientAndPorto = () => {
             {t("cta_text")}
           </p>
           <motion.button
+            onClick={() => navigate("/contact-us")}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={`font-semibold px-8 py-3 rounded-xl shadow-lg inline-flex items-center gap-2 transition ${

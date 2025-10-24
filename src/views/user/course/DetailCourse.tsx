@@ -25,6 +25,16 @@ const DetailCourse = () => {
     queryFn: () => courseService.getById(id!),
   });
 
+  const { data: takenCourse } = useSuspenseQuery({
+    queryKey: ["taken-course"],
+    queryFn: courseService.getTakenCourse,
+  });
+
+  console.log("course", course);
+
+  // ✅ Validasi apakah kursus ini sudah diambil oleh user
+  const isCourseTaken = takenCourse?.some((item) => item.id === id);
+
   const [selectedMeeting, setselectedMeeting] = useState(
     course.courseMeeting?.[0] || null
   );
@@ -171,50 +181,62 @@ const DetailCourse = () => {
             </div>
           </div>
 
-          {/* Tombol Apply Course */}
-          <div className="flex justify-start">
-            <button
-              onClick={() => applyMutation.mutate()}
-              disabled={applyMutation.isPending}
-              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg
+          {/* ✅ Tombol Apply Course */}
+          {!isCourseTaken ? (
+            <div className="flex justify-start">
+              <button
+                onClick={() => applyMutation.mutate()}
+                disabled={applyMutation.isPending}
+                className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg
                 ${
                   applyMutation.isPending
                     ? "bg-slate-700 text-slate-400 cursor-not-allowed"
                     : "bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:opacity-90"
                 }`}
-            >
-              {applyMutation.isPending ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8z"
-                    ></path>
-                  </svg>
-                  Applying...
-                </>
-              ) : (
-                <>
-                  <CheckCircle size={18} />
-                  Apply Course
-                </>
-              )}
-            </button>
-          </div>
+              >
+                {applyMutation.isPending ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8z"
+                      ></path>
+                    </svg>
+                    Applying...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle size={18} />
+                    Apply Course
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="flex justify-start">
+              <button
+                disabled
+                className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold bg-slate-700 text-slate-400 cursor-not-allowed shadow-lg"
+              >
+                <CheckCircle size={18} />
+                Sudah Diambil
+              </button>
+            </div>
+          )}
 
           {/* Deskripsi */}
           <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6">
@@ -274,36 +296,73 @@ const DetailCourse = () => {
 
             {course.courseMeeting && course.courseMeeting.length > 0 ? (
               <div className="overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800 hover:scrollbar-thumb-slate-600 flex-1">
-                {course.courseMeeting.map((meet) => (
-                  <div
-                    key={meet.id}
-                    onClick={() => setselectedMeeting(meet)}
-                    className={`p-3 rounded-lg border transition-all cursor-pointer ${
-                      selectedMeeting?.id === meet.id
-                        ? "border-blue-500 bg-blue-500/20"
-                        : "border-slate-700 hover:bg-slate-700/40"
-                    }`}
-                  >
-                    <p
-                      className={`font-medium text-sm ${
-                        selectedMeeting?.id === meet.id
-                          ? "text-blue-300"
-                          : "text-slate-200"
-                      }`}
+                {course.courseMeeting.map((meet) => {
+                  const now = new Date();
+                  const start = new Date(meet.startAt);
+                  const end = new Date(meet.endAt);
+
+                  // 🔹 Status: ongoing atau finished
+                  const isOngoing = now >= start && now <= end;
+                  const isFinished = now > end;
+
+                  return (
+                    <div
+                      key={meet.id}
+                      onClick={() => setselectedMeeting(meet)}
+                      className={`p-3 rounded-lg border transition-all cursor-pointer
+              ${
+                selectedMeeting?.id === meet.id
+                  ? "border-rose-400 shadow-lg p-4" // tonjolkan selected
+                  : isOngoing
+                  ? "border-emerald-500 bg-emerald-500/20"
+                  : isFinished
+                  ? "border-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20 opacity-50"
+                  : "border-slate-700 hover:bg-slate-700/40"
+              }`}
                     >
-                      {meet.title}
-                    </p>
-                    <p className="text-xs text-slate-400">
-                      {new Date(meet.startAt).toLocaleString("id-ID", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                ))}
+                      <div className="flex justify-between items-center">
+                        <p
+                          className={`font-medium text-sm ${
+                            isOngoing
+                              ? "text-emerald-300"
+                              : isFinished
+                              ? "text-yellow-300"
+                              : "text-slate-200"
+                          }`}
+                        >
+                          {meet.title}
+                        </p>
+
+                        {/* 🔹 Badge status */}
+                        {isOngoing && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-600/30 text-emerald-300">
+                            Sedang berlangsung
+                          </span>
+                        )}
+                        {isFinished && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-600/30 text-yellow-300">
+                            Selesai
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-slate-400 mt-1">
+                        {start.toLocaleString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        —{" "}
+                        {end.toLocaleString("id-ID", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-slate-400 text-sm italic">

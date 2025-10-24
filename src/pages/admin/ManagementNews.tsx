@@ -30,6 +30,9 @@ const ManagementNews = () => {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<any>(null);
+  const [newsToDelete, setNewsToDelete] = useState<any>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const navigate = useNavigate();
 
   // === Fetch Data ===
@@ -57,14 +60,24 @@ const ManagementNews = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: { id: string; formData: FormData }) =>
-      newsService.update(data.id, data.formData),
+    mutationFn: async (data: any) => {
+      const formData = new FormData();
+      formData.append("title", data.title);
+
+      // ✅ Hanya kirim image kalau user upload gambar baru
+      if (data.image && data.image.length > 0) {
+        formData.append("image", data.image[0]);
+      }
+
+      return newsService.update(editingNews.id, formData);
+    },
     onSuccess: () => {
-      toast.success("Berita berhasil diperbarui");
+      toast.success("Berita berhasil diperbarui!");
       refetch();
       setIsModalOpen(false);
       setEditingNews(null);
     },
+    onError: () => toast.error("Gagal memperbarui berita"),
   });
 
   const deleteMutation = useMutation({
@@ -119,10 +132,9 @@ const ManagementNews = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Yakin ingin menghapus berita ini?")) {
-      deleteMutation.mutate(id);
-    }
+  const handleDelete = (news: any) => {
+    setNewsToDelete(news);
+    setIsDeleteModalOpen(true);
   };
 
   return (
@@ -214,7 +226,7 @@ const ManagementNews = () => {
                           <Edit3 size={16} className="text-cyan-400" />
                         </button>
                         <button
-                          onClick={() => handleDelete(news.id)}
+                          onClick={() => handleDelete(news)}
                           className="p-2 rounded-lg bg-slate-700/50 hover:bg-red-500/20 transition"
                         >
                           <Trash2 size={16} className="text-red-400" />
@@ -337,6 +349,51 @@ const ManagementNews = () => {
                     : "Tambah Berita"}
                 </button>
               </form>
+            </div>
+          </div>
+        )}
+
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+            <div className="bg-slate-900 border border-red-500/50 rounded-lg p-6 w-full max-w-sm relative shadow-xl">
+              <h2 className="text-xl font-semibold text-red-400 mb-3">
+                Hapus Berita?
+              </h2>
+              <p className="text-slate-300 mb-5">
+                Berita{" "}
+                <span className="text-red-300 font-medium">
+                  “{newsToDelete?.title}”
+                </span>{" "}
+                akan dihapus permanen. Kamu yakin?
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setNewsToDelete(null);
+                  }}
+                  className="px-4 py-2 rounded-md bg-slate-700 hover:bg-slate-600 transition text-sm"
+                >
+                  Batal
+                </button>
+
+                <button
+                  onClick={() => {
+                    deleteMutation.mutate(newsToDelete.id, {
+                      onSuccess: () => {
+                        toast.success("Berita berhasil dihapus!");
+                        setIsDeleteModalOpen(false);
+                        setNewsToDelete(null);
+                      },
+                    });
+                  }}
+                  disabled={deleteMutation.isPending}
+                  className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-500 transition text-sm font-semibold"
+                >
+                  {deleteMutation.isPending ? "Menghapus..." : "Hapus"}
+                </button>
+              </div>
             </div>
           </div>
         )}

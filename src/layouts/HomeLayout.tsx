@@ -23,7 +23,6 @@ const HomeLayout = ({ children }: any) => {
   const toggleTheme = () =>
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
-  // ✅ Partikel dibuat 1x saja (tidak re-render setiap kali layout berubah)
   const particles = useMemo(() => {
     return [...Array(10)].map((_, i) => ({
       id: i,
@@ -48,14 +47,14 @@ const HomeLayout = ({ children }: any) => {
         <main
           className={`flex-1 relative z-10 border-t border-yellow-400/10 transition-colors duration-700 ${
             theme === "dark"
-              ? "bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#1a1a1a] text-[#f5f5f5]"
-              : "bg-gradient-to-br from-[#fdfdfd] via-[#f6f6f6] to-[#ededed] text-[#111111]"
+              ? "bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#1a1a1a]"
+              : "bg-gradient-to-br from-[#fdfdfd] via-[#f6f6f6] to-[#ededed]"
           }`}
         >
           {/* 🌕 Efek Cahaya */}
           <div className="absolute inset-0 pointer-events-none">
             <div
-              className={`absolute -top-40 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[120px] transition-opacity duration-700 will-change-transform`}
+              className={`absolute -top-40 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[120px] transition-opacity duration-700`}
               style={{
                 backgroundColor:
                   theme === "dark"
@@ -64,7 +63,7 @@ const HomeLayout = ({ children }: any) => {
               }}
             />
             <div
-              className={`absolute bottom-0 right-0 w-[320px] h-[320px] rounded-full blur-[80px] transition-opacity duration-700 will-change-transform`}
+              className={`absolute bottom-0 right-0 w-[320px] h-[320px] rounded-full blur-[80px] transition-opacity duration-700`}
               style={{
                 backgroundColor:
                   theme === "dark"
@@ -74,11 +73,10 @@ const HomeLayout = ({ children }: any) => {
             />
           </div>
 
-          {/* Konten */}
-          <div className="relative z-10">
-            {children}
-            <Footer />
-          </div>
+          {/* Konten halaman */}
+          <div className="relative z-10">{children}</div>
+
+          <Footer />
         </main>
 
         {/* ✨ Partikel ringan */}

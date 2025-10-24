@@ -41,8 +41,8 @@ export const attendanceService = {
     return response.data;
   },
 
-  async todayAttendance() {
-    const response = await axiosInstance.get(`/attendance/today`);
+  async todayAttendance(date: string) {
+    const response = await axiosInstance.get(`/attendance/daily?date=${date}`);
     return response.data;
   },
 };

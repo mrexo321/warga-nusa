@@ -7,12 +7,14 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { shiftService } from "../../services/shiftService";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ManagementShift = () => {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentId, setCurrentId] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null); // ✅ ID untuk konfirmasi hapus
 
   const [form, setForm] = useState({
     name: "",
@@ -52,6 +54,7 @@ const ManagementShift = () => {
     mutationFn: (id: number) => shiftService.deleteShift(id),
     onSuccess: () => {
       queryClient.invalidateQueries(["shifts"]);
+      setConfirmDeleteId(null); // ✅ Tutup modal konfirmasi
     },
   });
 
@@ -88,16 +91,31 @@ const ManagementShift = () => {
     if (!form.name || !form.checkIn || !form.checkOut)
       return alert("Semua field wajib diisi!");
 
-    if (isEditMode && currentId) {
-      updateShiftMutation.mutate({ id: currentId, data: form });
-    } else {
-      createShiftMutation.mutate(form);
-    }
-  };
+    // Format waktu agar sesuai regex (hapus detik jika ada)
+    const formatTime = (time: string) => {
+      if (!time) return "";
+      return time.slice(0, 5); // ubah "08:00:00" → "08:00"
+    };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Apakah Anda yakin ingin menghapus shift ini?")) {
-      deleteShiftMutation.mutate(id);
+    const formattedData = {
+      name: form.name,
+      checkIn: formatTime(form.checkIn),
+      checkOut: formatTime(form.checkOut),
+    };
+
+    if (isEditMode && currentId) {
+      // 🔹 Gunakan nilai lama jika field tidak berubah
+      const currentShift = shifts.find((s) => s.id === currentId);
+      updateShiftMutation.mutate({
+        id: currentId,
+        data: {
+          name: formattedData.name || currentShift.name,
+          checkIn: formattedData.checkIn || currentShift.checkIn.slice(0, 5),
+          checkOut: formattedData.checkOut || currentShift.checkOut.slice(0, 5),
+        },
+      });
+    } else {
+      createShiftMutation.mutate(formattedData);
     }
   };
 
@@ -168,7 +186,7 @@ const ManagementShift = () => {
                     </button>
                     <button
                       className="p-2 rounded-lg bg-slate-700/50 hover:bg-red-500/20 transition"
-                      onClick={() => handleDelete(shift.id)}
+                      onClick={() => setConfirmDeleteId(shift.id)} // ✅ buka modal konfirmasi
                     >
                       <Trash2 size={16} className="text-red-400" />
                     </button>
@@ -270,6 +288,53 @@ const ManagementShift = () => {
             </div>
           </div>
         )}
+
+        {/* ✅ Modal Konfirmasi Hapus */}
+        <AnimatePresence>
+          {confirmDeleteId && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 flex items-center justify-center bg-black/70 z-50 p-4"
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 30 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="bg-slate-800 border border-red-500/40 rounded-2xl shadow-lg p-6 max-w-sm w-full text-center"
+              >
+                <div className="flex justify-center mb-4">
+                  <Trash2 size={36} className="text-red-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-red-400 mb-2">
+                  Hapus Shift?
+                </h3>
+                <p className="text-slate-300 text-sm mb-6">
+                  Apakah Anda yakin ingin menghapus shift ini? Tindakan ini
+                  tidak dapat dibatalkan.
+                </p>
+
+                <div className="flex justify-center space-x-3">
+                  <button
+                    onClick={() => setConfirmDeleteId(null)}
+                    className="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={() => deleteShiftMutation.mutate(confirmDeleteId)}
+                    disabled={deleteShiftMutation.isPending}
+                    className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white font-semibold rounded-lg hover:scale-[1.05] transition disabled:opacity-60"
+                  >
+                    {deleteShiftMutation.isPending ? "Menghapus..." : "Hapus"}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </MainLayout>
   );
