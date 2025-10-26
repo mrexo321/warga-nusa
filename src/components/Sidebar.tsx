@@ -4,7 +4,6 @@ import { clearUserData } from "../store/userSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { RootState } from "../store/store";
 import { X, LogOut } from "lucide-react";
-
 import Logo from "../../public/logo.png";
 
 interface SidebarProps {

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import environment from "../../config/environment";
 
 const SecurityCourses = () => {
-  const [activeTab, setActiveTab] = useState<"my" | "all">("all");
+  const [activeTab, setActiveTab] = useState<"my" | "all">("my");
 
   // ✅ Query semua kursus
   const {

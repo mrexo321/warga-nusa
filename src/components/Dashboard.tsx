@@ -103,15 +103,6 @@ const chartData = [
   { name: "Min", total: 6 },
 ];
 
-const adminChartData = [
-  { name: "Jan", absensi: 320, kursus: 8 },
-  { name: "Feb", absensi: 340, kursus: 7 },
-  { name: "Mar", absensi: 310, kursus: 10 },
-  { name: "Apr", absensi: 370, kursus: 9 },
-  { name: "Mei", absensi: 400, kursus: 12 },
-  { name: "Jun", absensi: 360, kursus: 11 },
-];
-
 // =====================================================
 // 🧭 Komponen Utama Dashboard
 // =====================================================
@@ -147,7 +138,7 @@ const Dashboard = () => {
     const userStatus = {
       absensi: attend?.status === "PRESENT" ? "Sudah Absen" : "Belum Absen",
       shift: todayShift ? todayShift.shift.name : "Tidak Ada Shift",
-      kursus: courseMeet ? courseMeet.name : "Tidak Ada Kursus",
+      kursus: courseMeet ? courseMeet.name : "Tidak Ada Pelatihan",
     };
 
     const weeklyAttendance = [
@@ -227,7 +218,7 @@ const Dashboard = () => {
               className="p-4 bg-slate-800/40 border border-slate-700 rounded-xl cursor-pointer hover:bg-slate-700/40 transition"
             >
               <BookOpen className="text-amber-400 mx-auto mb-2" size={22} />
-              <p className="text-slate-400 text-sm">Kursus Hari Ini</p>
+              <p className="text-slate-400 text-sm">Pelatihan Hari Ini</p>
               <p className="text-lg font-semibold text-cyan-400 line-clamp-1">
                 {userStatus.kursus}
               </p>
@@ -510,7 +501,7 @@ const Dashboard = () => {
               👋
             </h1>
             <p className="text-slate-400 text-sm mt-1">
-              Lihat status absensi, shift, dan kursus Anda hari ini.
+              Lihat status absensi, shift, dan Pelatihan Anda hari ini.
             </p>
           </div>
           <ClockWidget />

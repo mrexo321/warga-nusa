@@ -109,14 +109,14 @@ const About = () => {
               : "from-yellow-500 to-amber-600"
           } bg-clip-text text-transparent drop-shadow-lg`}
         >
-          {t("title", { brand: "WargaNusa" })}
+          {t("title", { brand: "WajraSena" })}
         </h2>
         <p
           className={`text-lg max-w-3xl mx-auto leading-relaxed transition-colors duration-700 ${
             isDark ? "text-gray-300" : "text-gray-600"
           }`}
         >
-          {t("description", { brand: "Wajrasena Garda Nusantara (WargaNusa)" })}
+          {t("description", { brand: "Wajrasena Garda Nusantara (WajraSena)" })}
         </p>
       </motion.div>
 

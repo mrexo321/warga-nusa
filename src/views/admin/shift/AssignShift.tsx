@@ -1,22 +1,22 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import MainLayout from "../../../layouts/MainLayout";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { shiftService } from "../../../services/shiftService";
 import { userService } from "../../../services/userService";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   CalendarDays,
-  UserPlus,
+  ChevronLeft,
+  ChevronRight,
   X,
   Loader2,
-  Users,
-  Search,
   CheckCircle2,
-  UserCheck,
   Trash2,
+  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,23 +24,17 @@ const AssignShift = () => {
   const queryClient = useQueryClient();
 
   const [selectedShift, setSelectedShift] = useState<string>("");
-  const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [hoverDate, setHoverDate] = useState<string | null>(null);
-  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(
-    null
-  );
-
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectedAssignedIds, setSelectedAssignedIds] = useState<string[]>([]);
   const [currentMonth, setCurrentMonth] = useState<number>(
     new Date().getMonth() + 1
   );
   const [currentYear, setCurrentYear] = useState<number>(
     new Date().getFullYear()
   );
-
-  const calendarRef = useRef<any>(null);
 
   // Fetch data
   const { data: shifts, isLoading: loadingShifts } = useQuery({
@@ -53,146 +47,136 @@ const AssignShift = () => {
     queryFn: userService.getAll,
   });
 
-  const { data: userShiftData, isLoading: loadingUserShifts } = useQuery({
+  const { data: userShiftData } = useSuspenseQuery({
     queryKey: ["user-shifts", currentYear, currentMonth],
     queryFn: () => shiftService.getUserShift(currentYear, currentMonth),
   });
 
-  // Assign shift
+  // Mutations
   const applyShiftMutation = useMutation({
     mutationFn: (payload: { userId: string; shiftId: string; date: string }) =>
       shiftService.applyShift(payload),
     onSuccess: () => {
-      toast.success("Shift berhasil ditugaskan!");
       queryClient.invalidateQueries({
         queryKey: ["user-shifts", currentYear, currentMonth],
       });
-      setSelectedUserId(null);
-      setSearch("");
-    },
-    onError: () => {
-      toast.error("Gagal menugaskan shift!");
     },
   });
 
-  // Unassign shift
   const unassignShiftMutation = useMutation({
     mutationFn: (payload: { userId: string; date: string }) =>
       shiftService.unassignShift(payload),
     onSuccess: () => {
-      toast.success("Shift berhasil dihapus!");
       queryClient.invalidateQueries({
         queryKey: ["user-shifts", currentYear, currentMonth],
       });
     },
-    onError: () => {
-      toast.error("Gagal menghapus shift!");
-    },
   });
 
-  // Sudah ditugaskan
-  const assignedUsers = useMemo(() => {
-    if (!userShiftData?.data?.schedules || !selectedDate) return [];
+  // Generate tanggal
+  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+  const firstDay = new Date(currentYear, currentMonth - 1, 1).getDay();
+  const dateList = Array.from({ length: daysInMonth }, (_, i) => {
+    const day = i + 1;
+    return `${currentYear}-${String(currentMonth).padStart(2, "0")}-${String(
+      day
+    ).padStart(2, "0")}`;
+  });
+
+  const getAssignedUsers = (date: string) => {
+    if (!userShiftData?.data?.schedules) return [];
     return userShiftData.data.schedules
-      .filter((s: any) => s.dailyShifts[selectedDate] !== null)
+      .filter((s: any) => s.dailyShifts[date] !== null)
       .map((s: any) => ({
         id: s.userId,
         name: s.name,
-        shiftName: s.dailyShifts[selectedDate]?.name,
+        shiftName: s.dailyShifts[date]?.name,
       }));
-  }, [userShiftData, selectedDate]);
+  };
 
-  // User belum punya shift
   const availableUsers = useMemo(() => {
-    if (!users) return [];
-    const assignedNames = assignedUsers.map((a) => a.name);
+    if (!users || !selectedDate) return [];
+    const assignedNames = getAssignedUsers(selectedDate).map((a) => a.name);
     return users.filter(
       (u: any) =>
         !assignedNames.includes(u.name) &&
         u.name.toLowerCase().includes(search.toLowerCase())
     );
-  }, [users, assignedUsers, search]);
+  }, [users, selectedDate, search, userShiftData]);
 
   const openAssignModal = (date: string) => {
     setSelectedDate(date);
     setSearch("");
-    setSelectedUserId(null);
+    setSelectedUsers([]);
+    setSelectedAssignedIds([]);
     setShowModal(true);
   };
 
-  const handleAssignShift = () => {
-    if (!selectedUserId || !selectedShift) {
-      toast.warning("Pilih shift dan user terlebih dahulu!");
+  const handleAssignShift = async () => {
+    if (!selectedUsers.length || !selectedShift) {
+      toast.warning("Pilih shift dan minimal satu user!");
       return;
     }
-    applyShiftMutation.mutate({
-      userId: selectedUserId,
-      shiftId: selectedShift,
-      date: selectedDate,
-    });
+    await Promise.all(
+      selectedUsers.map((userId) =>
+        applyShiftMutation.mutateAsync({
+          userId,
+          shiftId: selectedShift,
+          date: selectedDate,
+        })
+      )
+    );
+    toast.success(`${selectedUsers.length} personel berhasil ditugaskan!`);
+    setSelectedUsers([]);
   };
 
-  // Generate events
-  const events =
-    userShiftData?.data?.schedules?.flatMap((schedule: any) => {
-      const { name: userName, dailyShifts } = schedule;
-      return Object.entries(dailyShifts)
-        .filter(([_, shift]: any) => shift !== null)
-        .map(([date, shift]: any) => ({
-          title: `${userName} - ${shift.name}`,
-          start: date,
-          extendedProps: { userName, shiftName: shift.name },
-          backgroundColor: "rgba(245, 158, 11, 0.85)",
-          borderColor: "transparent",
-          textColor: "#fff",
-        }));
-    }) || [];
-
-  // Hover tooltip
-  const handleMouseEnter = (date: string, e: any) => {
-    const rect = e.target.getBoundingClientRect();
-    setHoverDate(date);
-    setTooltipPos({
-      x: rect.left + rect.width / 2,
-      y: rect.top - 10,
-    });
-  };
-  const handleMouseLeave = () => {
-    setHoverDate(null);
+  const handleUnassignSelected = async () => {
+    if (!selectedAssignedIds.length) {
+      toast.warning("Pilih minimal satu personel untuk dihapus!");
+      return;
+    }
+    await Promise.all(
+      selectedAssignedIds.map((userId) =>
+        unassignShiftMutation.mutateAsync({ userId, date: selectedDate })
+      )
+    );
+    toast.success(`${selectedAssignedIds.length} personel dihapus!`);
+    setSelectedAssignedIds([]);
   };
 
-  const handleDatesSet = (info: any) => {
-    const date = info.view.currentStart;
-    setCurrentYear(date.getFullYear());
-    setCurrentMonth(date.getMonth() + 1);
+  // Navigasi bulan
+  const changeMonth = (delta: number) => {
+    const newMonth = currentMonth + delta;
+    if (newMonth < 1) {
+      setCurrentMonth(12);
+      setCurrentYear(currentYear - 1);
+    } else if (newMonth > 12) {
+      setCurrentMonth(1);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(newMonth);
+    }
   };
 
-  console.log("assigned", assignedUsers);
+  const monthName = new Date(currentYear, currentMonth - 1).toLocaleString(
+    "id-ID",
+    { month: "long", year: "numeric" }
+  );
 
   return (
     <MainLayout>
-      <div className="p-6 space-y-6 relative">
+      <div className="p-4 space-y-4">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="flex justify-between items-center bg-slate-900/60 border border-slate-700 rounded-xl p-4 backdrop-blur-md shadow-lg"
-        >
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-white flex items-center gap-2">
             <CalendarDays className="text-amber-400" />
-            Kalender Shift Personel
+            Penjadwalan Shift
           </h1>
-        </motion.div>
+        </div>
 
         {/* Pilih Shift */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700 rounded-xl p-5 shadow-lg"
-        >
-          <label className="block text-slate-300 font-medium mb-2">
+        <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4">
+          <label className="block text-slate-300 mb-2 text-sm font-medium">
             Pilih Shift
           </label>
           {loadingShifts ? (
@@ -202,7 +186,7 @@ const AssignShift = () => {
             </div>
           ) : (
             <select
-              className="w-full bg-slate-950/80 border border-slate-700 text-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
+              className="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
               value={selectedShift}
               onChange={(e) => setSelectedShift(e.target.value)}
             >
@@ -214,249 +198,216 @@ const AssignShift = () => {
               ))}
             </select>
           )}
-        </motion.div>
+        </div>
 
         {/* Kalender */}
         {selectedShift && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-slate-800/40 border border-slate-700 rounded-xl p-5 shadow-xl relative"
-          >
-            <FullCalendar
-              ref={calendarRef}
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              events={events}
-              selectable
-              dateClick={(info) => openAssignModal(info.dateStr)}
-              headerToolbar={{
-                left: "prev,next today",
-                center: "title",
-                right: "dayGridMonth,dayGridWeek",
-              }}
-              datesSet={handleDatesSet}
-              titleFormat={{ year: "numeric", month: "long" }}
-              eventContent={(arg) => (
-                <div className="flex items-center gap-1 text-xs bg-amber-500/20 px-2 py-1 rounded-md backdrop-blur-sm">
-                  <Users size={12} className="text-amber-300" />
-                  <span className="truncate">{arg.event.title}</span>
-                </div>
-              )}
-              dayCellDidMount={(arg) => {
-                arg.el.onmouseenter = (e) => handleMouseEnter(arg.dateStr, e);
-                arg.el.onmouseleave = handleMouseLeave;
-                arg.el.classList.add(
-                  "hover:bg-amber-500/10",
-                  "transition",
-                  "cursor-pointer",
-                  "rounded-lg"
-                );
-              }}
-              height="auto"
-              dayMaxEvents={3}
-            />
+          <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <button
+                onClick={() => changeMonth(-1)}
+                className="p-2 rounded-lg hover:bg-slate-700"
+              >
+                <ChevronLeft className="text-slate-300" />
+              </button>
+              <h2 className="text-white font-semibold">{monthName}</h2>
+              <button
+                onClick={() => changeMonth(1)}
+                className="p-2 rounded-lg hover:bg-slate-700"
+              >
+                <ChevronRight className="text-slate-300" />
+              </button>
+            </div>
 
-            {/* Tooltip popup */}
-            <AnimatePresence>
-              {hoverDate && tooltipPos && (
-                <motion.div
-                  className="fixed z-50 bg-slate-900/95 border border-slate-700 rounded-xl p-4 text-sm shadow-2xl text-slate-200 backdrop-blur-md w-64"
-                  style={{
-                    top: tooltipPos.y,
-                    left: tooltipPos.x,
-                    transform: "translate(-50%, -100%)",
-                  }}
-                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  <p className="font-semibold text-amber-400 mb-2 text-center">
-                    {new Date(hoverDate).toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                    })}
-                  </p>
-                  <ul className="space-y-1 max-h-40 overflow-y-auto">
-                    {userShiftData?.data?.schedules
-                      ?.filter((s: any) => s.dailyShifts[hoverDate])
-                      .map((s: any, i: number) => (
-                        <li
-                          key={i}
-                          className="flex justify-between items-center bg-slate-800/60 px-3 py-1.5 rounded-md text-xs border border-slate-700"
-                        >
-                          <span>{s.name}</span>
-                          <span className="text-amber-400 font-medium">
-                            {s.dailyShifts[hoverDate]?.name}
-                          </span>
-                        </li>
-                      ))}
-                    {!userShiftData?.data?.schedules?.some(
-                      (s: any) => s.dailyShifts[hoverDate]
-                    ) && (
-                      <p className="text-center text-slate-500 italic text-xs">
-                        Tidak ada personel
-                      </p>
-                    )}
-                  </ul>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+            <div className="grid grid-cols-7 gap-2 text-center text-xs text-slate-400 mb-2 hidden sm:grid">
+              {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d) => (
+                <div key={d}>{d}</div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+              {Array.from({ length: firstDay }).map((_, i) => (
+                <div key={i}></div>
+              ))}
+              {dateList.map((date) => {
+                const assigned = getAssignedUsers(date);
+                return (
+                  <button
+                    key={date}
+                    onClick={() => openAssignModal(date)}
+                    className={`rounded-xl shadow-sm border transition-all flex flex-col items-center justify-center p-2 sm:p-3 ${
+                      assigned.length
+                        ? "border-amber-400 bg-gradient-to-br from-slate-800 to-slate-700"
+                        : "border-slate-700 bg-slate-900 hover:bg-slate-800"
+                    }`}
+                  >
+                    <div className="font-bold text-white text-sm sm:text-base">
+                      {new Date(date).getDate()}
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-amber-400 mt-0.5">
+                      {assigned.length ? `${assigned.length} org` : "kosong"}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
 
-        {/* Modal */}
-        <AnimatePresence>
-          {showModal && (
-            <motion.div
-              className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <motion.div
-                className="bg-slate-900/95 border border-slate-700 rounded-2xl p-8 w-full max-w-4xl relative shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-6"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-              >
-                <button
-                  className="absolute top-4 right-4 text-slate-400 hover:text-white"
-                  onClick={() => setShowModal(false)}
-                >
-                  <X size={24} />
-                </button>
+        {/* MODAL kiri-kanan */}
+        {showModal && (
+          <div className="fixed inset-0 z-50 bg-slate-950/95 text-slate-100 flex flex-col sm:flex-row">
+            <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-4 py-3 border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm">
+              <h2 className="font-semibold">
+                {new Date(selectedDate).toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}
+              </h2>
+              <button onClick={() => setShowModal(false)}>
+                <X className="text-slate-400" />
+              </button>
+            </div>
 
-                {/* Kiri: Sudah ditugaskan */}
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <UserCheck className="text-emerald-400" size={18} />
-                    Sudah Ditugaskan
-                  </h3>
-                  {assignedUsers.length > 0 ? (
-                    <ul className="space-y-2 max-h-80 overflow-y-auto pr-1">
-                      {assignedUsers.map((a, i) => (
-                        <li
-                          key={i}
-                          className="flex justify-between items-center bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-lg text-slate-300 text-sm"
-                        >
-                          <div className="flex flex-col">
-                            <span>{a.name}</span>
-                            <span className="text-amber-400 font-medium">
-                              {a.shiftName}
-                            </span>
-                          </div>
-                          <button
-                            onClick={() =>
-                              unassignShiftMutation.mutate({
-                                userId: a.id,
-                                date: selectedDate,
-                              })
-                            }
-                            disabled={unassignShiftMutation.isPending}
-                            className="text-red-400 hover:text-red-500 transition"
-                          >
-                            {unassignShiftMutation.isPending ? (
-                              <Loader2 className="animate-spin" size={16} />
-                            ) : (
-                              <Trash2 size={16} />
-                            )}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-slate-500 text-sm italic">
-                      Belum ada personel ditugaskan di tanggal ini.
-                    </p>
-                  )}
-                </div>
+            {/* Kiri: Sudah Ditugaskan */}
+            <div className="flex-1 mt-14 p-4 border-r border-slate-700 overflow-y-auto">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-sm font-semibold text-emerald-400">
+                  Sudah Ditugaskan
+                </h3>
+                {selectedAssignedIds.length > 0 && (
+                  <button
+                    onClick={handleUnassignSelected}
+                    className="text-red-400 text-sm font-medium hover:text-red-500"
+                  >
+                    Hapus Terpilih
+                  </button>
+                )}
+              </div>
 
-                {/* Kanan: Cari & Assign */}
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <UserPlus className="text-amber-400" size={18} />
-                    Tambah Personel -{" "}
-                    {new Date(selectedDate).toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </h3>
-
-                  <div className="relative mb-4">
-                    <Search
-                      className="absolute left-3 top-2.5 text-slate-400"
-                      size={16}
-                    />
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Cari personel..."
-                      className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
-                    />
-                  </div>
-
-                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                    {loadingUsers ? (
-                      <div className="flex justify-center py-6">
-                        <Loader2
-                          className="animate-spin text-slate-400"
-                          size={22}
-                        />
+              {getAssignedUsers(selectedDate).length ? (
+                getAssignedUsers(selectedDate).map((a) => (
+                  <label
+                    key={a.id}
+                    className={`flex justify-between items-center bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 mb-2 cursor-pointer ${
+                      selectedAssignedIds.includes(a.id)
+                        ? "border-red-400 bg-red-500/10"
+                        : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedAssignedIds.includes(a.id)}
+                        onChange={(e) => {
+                          if (e.target.checked)
+                            setSelectedAssignedIds([
+                              ...selectedAssignedIds,
+                              a.id,
+                            ]);
+                          else
+                            setSelectedAssignedIds(
+                              selectedAssignedIds.filter((id) => id !== a.id)
+                            );
+                        }}
+                        className="accent-red-500"
+                      />
+                      <div>
+                        <p>{a.name}</p>
+                        <p className="text-amber-400 text-xs">{a.shiftName}</p>
                       </div>
-                    ) : availableUsers.length ? (
-                      availableUsers.map((user: any) => (
-                        <motion.button
-                          key={user.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.97 }}
-                          onClick={() => setSelectedUserId(user.id)}
-                          className={`w-full flex justify-between items-center px-4 py-2 border rounded-lg text-left text-slate-200 transition ${
-                            selectedUserId === user.id
-                              ? "bg-amber-600/30 border-amber-500"
-                              : "bg-slate-800/70 hover:bg-slate-700/70 border-slate-700"
-                          }`}
-                        >
-                          <span>{user.name}</span>
-                          {selectedUserId === user.id && (
-                            <CheckCircle2
-                              size={16}
-                              className="text-amber-400"
-                            />
-                          )}
-                        </motion.button>
-                      ))
-                    ) : (
-                      <p className="text-center text-slate-400 text-sm py-3">
-                        Tidak ada personel tersedia
-                      </p>
-                    )}
-                  </div>
+                    </div>
+                  </label>
+                ))
+              ) : (
+                <p className="text-slate-500 text-sm italic">
+                  Belum ada personel ditugaskan.
+                </p>
+              )}
+            </div>
 
-                  <div className="mt-5 flex justify-end">
-                    <button
-                      onClick={handleAssignShift}
-                      disabled={applyShiftMutation.isPending}
-                      className="bg-amber-500 hover:bg-amber-600 text-white font-medium px-5 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50"
-                    >
-                      {applyShiftMutation.isPending && (
-                        <Loader2 className="animate-spin" size={16} />
-                      )}
-                      Assign Shift
-                    </button>
+            {/* Kanan: Tambah Personel */}
+            <div className="flex-1 mt-14 p-4 flex flex-col">
+              <h3 className="text-sm font-semibold text-amber-400 mb-3">
+                Tambah Personel
+              </h3>
+              <div className="relative mb-3">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-2.5 text-slate-400"
+                />
+                <input
+                  type="text"
+                  placeholder="Cari nama..."
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-2">
+                {loadingUsers ? (
+                  <div className="text-center py-4">
+                    <Loader2 className="animate-spin mx-auto text-slate-400" />
                   </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                ) : availableUsers.length ? (
+                  availableUsers.map((user: any) => (
+                    <label
+                      key={user.id}
+                      className={`flex justify-between items-center px-4 py-2 rounded-lg border text-sm cursor-pointer ${
+                        selectedUsers.includes(user.id)
+                          ? "bg-amber-600/30 border-amber-500"
+                          : "bg-slate-800 border-slate-700 hover:bg-slate-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.includes(user.id)}
+                          onChange={(e) => {
+                            if (e.target.checked)
+                              setSelectedUsers([...selectedUsers, user.id]);
+                            else
+                              setSelectedUsers(
+                                selectedUsers.filter((id) => id !== user.id)
+                              );
+                          }}
+                          className="accent-amber-500"
+                        />
+                        <span>{user.name}</span>
+                      </div>
+                      {selectedUsers.includes(user.id) && (
+                        <CheckCircle2
+                          size={16}
+                          className="text-amber-400 flex-shrink-0"
+                        />
+                      )}
+                    </label>
+                  ))
+                ) : (
+                  <p className="text-center text-slate-500 text-sm">
+                    Tidak ada personel tersedia.
+                  </p>
+                )}
+              </div>
+
+              {/* Tombol */}
+              <div className="mt-4 border-t border-slate-700 pt-3">
+                <button
+                  onClick={handleAssignShift}
+                  disabled={applyShiftMutation.isPending}
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg font-medium flex justify-center items-center gap-2 disabled:opacity-50"
+                >
+                  {applyShiftMutation.isPending && (
+                    <Loader2 className="animate-spin" size={18} />
+                  )}
+                  Simpan Penugasan ({selectedUsers.length})
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </MainLayout>
   );
