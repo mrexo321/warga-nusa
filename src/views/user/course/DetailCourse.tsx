@@ -305,25 +305,35 @@ const DetailCourse = () => {
                   const isOngoing = now >= start && now <= end;
                   const isFinished = now > end;
 
+                  // 🔹 Status: selected
+                  const isSelected = selectedMeeting?.id === meet.id;
+
                   return (
                     <div
                       key={meet.id}
                       onClick={() => setselectedMeeting(meet)}
-                      className={`p-3 rounded-lg border transition-all cursor-pointer
-              ${
-                selectedMeeting?.id === meet.id
-                  ? "border-rose-400 shadow-lg p-4" // tonjolkan selected
-                  : isOngoing
-                  ? "border-emerald-500 bg-emerald-500/20"
-                  : isFinished
-                  ? "border-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20 opacity-50"
-                  : "border-slate-700 hover:bg-slate-700/40"
-              }`}
+                      className={`relative group p-3 rounded-xl border cursor-pointer transition-all duration-200
+        ${
+          isSelected
+            ? "border-pink-500 bg-gradient-to-r from-pink-600/30 via-slate-800/70 to-pink-600/30 scale-[1.02] shadow-[0_0_20px_rgba(236,72,153,0.4)]"
+            : isOngoing
+            ? "border-emerald-500 bg-emerald-500/15 hover:bg-emerald-500/25"
+            : isFinished
+            ? "border-yellow-500/40 bg-yellow-500/10 hover:bg-yellow-500/20 opacity-60"
+            : "border-slate-700 bg-slate-800/40 hover:bg-slate-700/40"
+        }`}
                     >
-                      <div className="flex justify-between items-center">
+                      {/* efek glowing border animasi */}
+                      {isSelected && (
+                        <div className="absolute inset-0 rounded-xl border-2 border-pink-400/60 animate-pulse pointer-events-none"></div>
+                      )}
+
+                      <div className="flex justify-between items-center relative z-10">
                         <p
                           className={`font-medium text-sm ${
-                            isOngoing
+                            isSelected
+                              ? "text-pink-300"
+                              : isOngoing
                               ? "text-emerald-300"
                               : isFinished
                               ? "text-yellow-300"
@@ -334,19 +344,24 @@ const DetailCourse = () => {
                         </p>
 
                         {/* 🔹 Badge status */}
-                        {isOngoing && (
+                        {isOngoing && !isSelected && (
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-600/30 text-emerald-300">
                             Sedang berlangsung
                           </span>
                         )}
-                        {isFinished && (
+                        {isFinished && !isSelected && (
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-600/30 text-yellow-300">
                             Selesai
                           </span>
                         )}
+                        {isSelected && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-pink-600/30 text-pink-300">
+                            Dipilih
+                          </span>
+                        )}
                       </div>
 
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs text-slate-400 mt-1 relative z-10">
                         {start.toLocaleString("id-ID", {
                           day: "numeric",
                           month: "long",

@@ -140,6 +140,8 @@ const CourseFormPage = () => {
     queryFn: () => courseService.getById(id!),
   });
 
+  console.log("course", course);
+
   useEffect(() => {
     if (course) {
       reset({
@@ -248,7 +250,7 @@ const CourseFormPage = () => {
     <MainLayout>
       <div className="p-6 space-y-6 text-slate-200">
         <h1 className="text-2xl font-bold">
-          {isEdit ? "Edit Kursus" : "Tambah Kursus"}
+          {isEdit ? "Edit Pelatihan" : "Tambah Kursus"}
         </h1>
 
         {/* === FORM KURSUS === */}
@@ -360,11 +362,11 @@ const CourseFormPage = () => {
                   </div>
                 )}
 
-                <input
+                {/* <input
                   type="datetime-local"
                   {...registerMeeting("start_at")}
                   className="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2"
-                />
+                /> */}
 
                 <button className="w-full bg-amber-500 text-slate-900 py-2 rounded-md font-semibold hover:bg-amber-400 transition">
                   Simpan Pertemuan
@@ -458,7 +460,7 @@ const CourseFormPage = () => {
                     <button
                       onClick={() =>
                         confirm("Yakin hapus file ini?") &&
-                        courseService.deleteMaterial(mat.id)
+                        courseService.deleteCourseMaterial(id, mat.id)
                       }
                       className="text-red-400 hover:text-red-300 transition"
                     >

@@ -41,23 +41,24 @@ axiosInstance.interceptors.response.use(
       const genericMessage = "Terjadi kesalahan pada server, coba lagi nanti.";
       const message = responseData?.message || responseData?.error;
 
-      if (message === "Token tidak valid.") {
+      // ✅ Tambahan kondisi di sini
+      if (
+        message === "Token tidak valid." ||
+        message === "Invalid or missing authentication token." ||
+        message === "Akses ditolak, token sudah kedaluwarsa"
+      ) {
         forceLogout();
         return Promise.reject(error);
       }
 
       if (status === 401) {
-        if (message === "Unauthorized") {
+        if (message === "Invalid or missing authentication token.") {
           forceLogout();
         } else {
           toast.error(message || "Terjadi kesalahan autentikasi!");
         }
       } else if (status === 403) {
-        if (message === "Akses ditolak, token sudah kedaluwarsa") {
-          forceLogout();
-        } else {
-          toast.error(message || "Anda tidak memiliki akses!");
-        }
+        toast.error(message || "Anda tidak memiliki akses!");
       } else {
         toast.error(message || genericMessage);
       }

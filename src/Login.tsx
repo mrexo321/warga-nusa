@@ -9,6 +9,7 @@ import { setUserData } from "./store/userSlice";
 import { authService } from "./services/authService";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react"; // ⬅️ Tambahkan ikon panah
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -49,6 +50,19 @@ const Login = () => {
       className="min-h-screen flex items-center justify-center relative overflow-hidden
       bg-gradient-to-b from-[#0d1117] via-[#0a0e14] to-[#05070a] text-white"
     >
+      {/* 🔹 Tombol Kembali */}
+      <motion.button
+        onClick={() => navigate("/")}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 rounded-full
+        bg-[#0d1117]/70 border border-yellow-400/20 backdrop-blur-md text-yellow-400
+        hover:bg-yellow-400 hover:text-black hover:shadow-yellow-400/50 transition-all"
+      >
+        <ArrowLeft size={18} />
+        <span className="text-sm font-medium">Kembali</span>
+      </motion.button>
+
       {/* Efek bintang halus */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,215,0,0.05)_0%,transparent_70%)] pointer-events-none" />
 
@@ -142,17 +156,6 @@ const Login = () => {
             {loginMutation.isPending ? "Memproses..." : "Masuk"}
           </motion.button>
         </form>
-
-        {/* Link tambahan */}
-        {/* <div className="mt-6 text-center text-sm text-gray-400">
-          Belum punya akun?{" "}
-          <span
-            onClick={() => navigate("/register")}
-            className="text-yellow-400 hover:underline cursor-pointer"
-          >
-            Daftar Sekarang
-          </span>
-        </div> */}
       </motion.div>
     </div>
   );

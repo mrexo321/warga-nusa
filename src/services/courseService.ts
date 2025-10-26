@@ -98,4 +98,10 @@ export const courseService = {
     const response = await axiosInstance.get(`/course/taken-course`);
     return response.data.data;
   },
+
+  async deleteCourseMaterial(courseId: string, materialId: string) {
+    const response = await axiosInstance.delete(
+      `/course/${courseId}/materials/${materialId}`
+    );
+  },
 };

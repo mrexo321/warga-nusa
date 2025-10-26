@@ -11,7 +11,7 @@ const ManagementCourse = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
-  // Ambil semua kursus
+  // Ambil semua Pelatihan
   const {
     data: courses = [],
     isLoading,
@@ -21,15 +21,17 @@ const ManagementCourse = () => {
     queryKey: ["courses"],
     queryFn: courseService.getAll,
     onError: (err: any) => {
-      toast.error(err?.response?.data?.message || "Gagal memuat data kursus");
+      toast.error(
+        err?.response?.data?.message || "Gagal memuat data Pelatihan"
+      );
     },
   });
 
-  // Hapus kursus
+  // Hapus Pelatihan
   const deleteMutation = useMutation({
     mutationFn: (id: string) => courseService.delete(id),
     onSuccess: () => {
-      toast.success("Kursus berhasil dihapus");
+      toast.success("Pelatihan berhasil dihapus");
       refetch();
     },
   });
@@ -44,14 +46,14 @@ const ManagementCourse = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <h1 className="text-2xl font-bold tracking-wide text-cyan-400">
-            📚 Manajemen Kursus
+            📚 Manajemen Pelatihan
           </h1>
 
           <button
             onClick={() => navigate("/courses/add")}
             className="flex items-center gap-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-900 font-semibold px-4 py-2 rounded-lg shadow-md hover:scale-105 transition-all duration-200"
           >
-            <Plus size={18} /> Tambah Kursus
+            <Plus size={18} /> Tambah Pelatihan
           </button>
         </div>
 
@@ -63,7 +65,7 @@ const ManagementCourse = () => {
           />
           <input
             type="text"
-            placeholder="Cari kursus..."
+            placeholder="Cari Pelatihan..."
             className="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-10 pr-3 py-2 text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-amber-500 outline-none"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -73,11 +75,13 @@ const ManagementCourse = () => {
         {/* State Loading / Error */}
         {isLoading && (
           <p className="text-center text-slate-400 animate-pulse">
-            Memuat daftar kursus...
+            Memuat daftar Pelatihan...
           </p>
         )}
         {isError && (
-          <p className="text-center text-red-400">Gagal memuat data kursus.</p>
+          <p className="text-center text-red-400">
+            Gagal memuat data Pelatihan.
+          </p>
         )}
 
         {/* Grid Card */}
@@ -137,7 +141,7 @@ const ManagementCourse = () => {
 
                     <button
                       onClick={() =>
-                        confirm("Yakin ingin menghapus kursus ini?") &&
+                        confirm("Yakin ingin menghapus Pelatihan ini?") &&
                         deleteMutation.mutate(course.id)
                       }
                       className="text-red-400 hover:text-red-300 transition"
@@ -153,7 +157,7 @@ const ManagementCourse = () => {
 
         {!isLoading && filteredCourses.length === 0 && (
           <p className="text-center text-slate-400 text-sm mt-10">
-            Tidak ada kursus ditemukan.
+            Tidak ada Pelatihan ditemukan.
           </p>
         )}
       </div>

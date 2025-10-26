@@ -125,6 +125,8 @@ const Dashboard = () => {
   // 👷‍♂️ VIEW UNTUK USER
   // =====================================================
   const UserView = () => {
+    const navigate = useNavigate();
+
     const { data, isLoading } = useQuery({
       queryKey: ["dashboard"],
       queryFn: dashboardService.getAll,
@@ -141,8 +143,6 @@ const Dashboard = () => {
     const todayShift = data?.todayShiftData;
     const attend = data?.isTodayAttended;
     const courseMeet = data?.activeCourseMeet?.[0];
-
-    console.log("data", courseMeet);
 
     const userStatus = {
       absensi: attend?.status === "PRESENT" ? "Sudah Absen" : "Belum Absen",
@@ -162,25 +162,28 @@ const Dashboard = () => {
 
     return (
       <motion.div
-        className="mt-10 space-y-8"
+        className="mt-6 md:mt-10 space-y-6 md:space-y-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
         {/* ALERT BELUM ABSEN */}
         {attend?.status !== "PRESENT" && (
-          <div className="bg-rose-500/20 border border-rose-600 text-rose-300 p-3 rounded-xl text-sm text-center animate-pulse">
+          <div
+            onClick={() => navigate("/shift-kehadiran")}
+            className="bg-rose-500/20 border border-rose-600 text-rose-300 cursor-pointer p-3 rounded-xl text-sm text-center animate-pulse"
+          >
             Kamu belum absen hari ini. Jangan lupa ya 👀
           </div>
         )}
 
         {/* STATUS HARI INI */}
-        <div className="bg-gradient-to-br from-slate-800/70 to-slate-900/40 border border-slate-700 rounded-2xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <div className="bg-gradient-to-br from-slate-800/70 to-slate-900/40 border border-slate-700 rounded-2xl p-4 md:p-6 shadow-lg">
+          <h3 className="text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
             <ShieldCheck className="text-green-400" size={20} />
             Status Kehadiran Hari Ini
           </h3>
 
-          <div className="grid sm:grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
             {/* Absensi */}
             <div className="p-4 bg-slate-800/40 border border-slate-700 rounded-xl">
               <ClipboardList className="text-cyan-400 mx-auto mb-2" size={22} />
@@ -218,12 +221,14 @@ const Dashboard = () => {
 
             {/* Kursus */}
             <div
-              onClick={() => navigate(`/course-satpam/detail/${courseMeet.id}`)}
-              className="p-4 bg-slate-800/40 border border-slate-700 rounded-xl cursor-pointer"
+              onClick={() =>
+                navigate(`/course-satpam/detail/${courseMeet?.id}`)
+              }
+              className="p-4 bg-slate-800/40 border border-slate-700 rounded-xl cursor-pointer hover:bg-slate-700/40 transition"
             >
               <BookOpen className="text-amber-400 mx-auto mb-2" size={22} />
               <p className="text-slate-400 text-sm">Kursus Hari Ini</p>
-              <p className="text-lg font-semibold text-cyan-400">
+              <p className="text-lg font-semibold text-cyan-400 line-clamp-1">
                 {userStatus.kursus}
               </p>
             </div>
@@ -231,25 +236,39 @@ const Dashboard = () => {
         </div>
 
         {/* KEHADIRAN MINGGU INI */}
-        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center gap-2 mb-4">
+        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 md:p-6 shadow-lg">
+          <div className="flex items-center gap-2 mb-3 md:mb-4">
             <CalendarCheck className="text-green-400" size={22} />
-            <h3 className="text-lg font-semibold">Kehadiran Mingguan</h3>
+            <h3 className="text-base md:text-lg font-semibold">
+              Kehadiran Mingguan
+            </h3>
           </div>
 
-          <div className="grid grid-cols-7 gap-3 text-center">
+          {/* Grid responsif */}
+          <div
+            className="
+    grid
+    grid-cols-2       /* mobile: 3 kolom */
+    sm:grid-cols-5    /* tablet: 5 kolom */
+    md:grid-cols-7    /* desktop: 7 kolom */
+    gap-3 sm:gap-4 md:gap-5
+    text-center
+  "
+          >
             {weeklyAttendance.map((day, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.07 }}
-                className="p-3 rounded-xl border border-slate-700 bg-slate-900/40"
+                className="p-3 sm:p-4 rounded-xl border border-slate-700 bg-slate-900/40 flex flex-col items-center justify-center"
               >
-                <p className="text-xs text-slate-400 mb-1">{day.name}</p>
+                <p className="text-[11px] sm:text-xs text-slate-400 mb-1">
+                  {day.name}
+                </p>
 
                 <div
-                  className={`mx-auto w-8 h-8 flex items-center justify-center rounded-full font-bold ${
+                  className={`mx-auto w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full font-bold ${
                     day.total === 1
                       ? "bg-green-500/20 text-green-400"
                       : "bg-rose-500/20 text-rose-400"
@@ -259,7 +278,7 @@ const Dashboard = () => {
                 </div>
 
                 {index === new Date().getDay() - 1 && (
-                  <p className="text-[10px] text-cyan-400 mt-1 font-medium">
+                  <p className="text-[10px] sm:text-[11px] text-cyan-400 mt-1 font-medium">
                     Hari Ini
                   </p>
                 )}
@@ -269,9 +288,9 @@ const Dashboard = () => {
         </div>
 
         {/* Kursus Aktif Detail */}
-        {courseMeet && (
-          <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-lg">
-            <h3 className="text-lg font-semibold mb-3 text-amber-400">
+        {/* {courseMeet && (
+          <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 md:p-6 shadow-lg">
+            <h3 className="text-base md:text-lg font-semibold mb-2 text-amber-400">
               Kursus Aktif Saat Ini
             </h3>
             <p className="text-slate-300 font-medium">{courseMeet.name}</p>
@@ -284,7 +303,7 @@ const Dashboard = () => {
               {new Date(courseMeet.courseMeeting[0].endAt).toLocaleTimeString()}
             </p>
           </div>
-        )}
+        )} */}
       </motion.div>
     );
   };
