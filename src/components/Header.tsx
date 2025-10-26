@@ -211,7 +211,7 @@ const Header = () => {
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className={`md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md
+        className={`md:hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-[100%] max-w-md
   flex justify-around items-center py-2 px-3 rounded-2xl z-50 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.2)]
   border border-yellow-400/20 transition-all duration-500
   ${
@@ -257,70 +257,6 @@ const Header = () => {
         })}
 
         {/* Login / Dashboard */}
-        {/* Login / Dashboard */}
-        {userSelector ? (
-          <motion.button
-            onClick={() => (window.location.href = "/dashboard")}
-            whileTap={{ scale: 0.9 }}
-            whileHover={{ scale: 1.15 }}
-            className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium relative transition-all
-      ${
-        location.pathname === "/dashboard"
-          ? "text-yellow-400"
-          : "opacity-80 hover:text-yellow-400 text-inherit"
-      }`}
-          >
-            <motion.div
-              animate={{
-                scale: location.pathname === "/dashboard" ? 1.2 : 1,
-                y: location.pathname === "/dashboard" ? -2 : 0,
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 15 }}
-            >
-              <Briefcase size={20} />
-            </motion.div>
-            <span>{t("nav.dashboard")}</span>
-
-            {/* 🔹 Active Glow Indicator */}
-            {location.pathname === "/dashboard" && (
-              <motion.div
-                layoutId="activeNav"
-                className="absolute bottom-[-6px] w-1.5 h-1.5 bg-yellow-400 rounded-full shadow-[0_0_6px_rgba(250,204,21,0.8)]"
-              />
-            )}
-          </motion.button>
-        ) : (
-          <motion.button
-            onClick={() => (window.location.href = "/login")}
-            whileTap={{ scale: 0.9 }}
-            whileHover={{ scale: 1.15 }}
-            className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium relative transition-all
-      ${
-        location.pathname === "/login"
-          ? "text-yellow-400"
-          : "opacity-80 hover:text-yellow-400 text-inherit"
-      }`}
-          >
-            <motion.div
-              animate={{
-                scale: location.pathname === "/login" ? 1.2 : 1,
-                y: location.pathname === "/login" ? -2 : 0,
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 15 }}
-            >
-              <User size={20} />
-            </motion.div>
-            <span>{t("nav.login")}</span>
-
-            {/* 🔹 Active Glow Indicator */}
-            {location.pathname === "/login" && (
-              <motion.div
-                layoutId="activeNav"
-                className="absolute bottom-[-6px] w-1.5 h-1.5 bg-yellow-400 rounded-full shadow-[0_0_6px_rgba(250,204,21,0.8)]"
-              />
-            )}
-          </motion.button>
-        )}
 
         {/* Tombol More */}
         <motion.button
@@ -344,7 +280,7 @@ const Header = () => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 200, opacity: 0 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className={`fixed bottom-0 left-0 w-full z-40 pt-4 pb-8 rounded-t-3xl border-t
+            className={`fixed bottom-8 left-0 w-full z-40 pt-4 pb-8 rounded-t-3xl border-t
       shadow-[0_-4px_25px_rgba(0,0,0,0.3)] backdrop-blur-xl
       ${
         theme === "dark"
@@ -393,63 +329,32 @@ const Header = () => {
                     : t("nav.switchToId")}
                 </span>
               </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* === FLOATING MENU (More Options) === */}
-      <AnimatePresence>
-        {showMore && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className={`fixed bottom-14 left-0 w-full z-40 px-4 pb-4 backdrop-blur-lg rounded-t-2xl shadow-lg
-              ${
-                theme === "dark"
-                  ? "bg-[#0f0f0f]/90 border-t border-yellow-400/20 text-gray-200"
-                  : "bg-white/95 border-t border-yellow-400/30 text-gray-800"
-              }`}
-          >
-            <div className="max-w-md mx-auto flex flex-col space-y-3 mt-3">
-              <Link
-                to="/contact-us"
-                onClick={() => setShowMore(false)}
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-yellow-400/10 transition"
-              >
-                <Phone size={18} />
-                <span>{t("nav.contact")}</span>
-              </Link>
-
-              <button
-                onClick={() => {
-                  toggleTheme();
-                  setShowMore(false);
-                }}
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-yellow-400/10 transition"
-              >
-                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-                <span>{theme === "dark" ? t("nav.light") : t("nav.dark")}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  toggleLanguage();
-                  setShowMore(false);
-                }}
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-yellow-400/10 transition"
-              >
-                <span className="font-semibold text-sm">
-                  {i18n.language === "id" ? "EN" : "ID"}
-                </span>
-                <span>
-                  {i18n.language === "id"
-                    ? t("nav.switchToEn")
-                    : t("nav.switchToId")}
-                </span>
-              </button>
+              {userSelector ? (
+                <motion.button
+                  onClick={() => (window.location.href = "/dashboard")}
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.15 }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-yellow-400/10 transition"
+                >
+                  <motion.div
+                    animate={{ scale: 1.2 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Briefcase size={20} />
+                  </motion.div>
+                  <span>{t("nav.dashboard")}</span>
+                </motion.button>
+              ) : (
+                <motion.button
+                  onClick={() => (window.location.href = "/login")}
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.15 }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-yellow-400/10 transition"
+                >
+                  <User size={20} />
+                  <span>{t("nav.login")}</span>
+                </motion.button>
+              )}
             </div>
           </motion.div>
         )}

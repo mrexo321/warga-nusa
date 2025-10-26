@@ -1,5 +1,5 @@
 import React, { useContext, Suspense, useMemo } from "react";
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { newsService } from "../services/newsService";
 import environment from "../config/environment";
@@ -7,10 +7,10 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ThemeContext } from "../layouts/HomeLayout";
 
-/* ===================== 🔹 Skeleton Card (Optimized) ===================== */
+/* ===================== 🔹 Skeleton Card ===================== */
 const NewsSkeleton = React.memo(({ isDark }: { isDark: boolean }) => (
   <div
-    className={`rounded-2xl border shadow-sm animate-pulse overflow-hidden h-[300px] ${
+    className={`rounded-2xl border animate-pulse overflow-hidden h-[300px] ${
       isDark
         ? "bg-[#1E1E1E]/80 border-amber-500/10"
         : "bg-white border-yellow-500/10"
@@ -25,16 +25,18 @@ const NewsSkeleton = React.memo(({ isDark }: { isDark: boolean }) => (
   </div>
 ));
 
-/* ===================== 🔹 News Card (Optimized + Memoized) ===================== */
+/* ===================== 🔹 News Card ===================== */
 const NewsCard = React.memo(
   ({ id, title, content, thumbnail, author_id, isDark }: any) => {
     const navigate = useNavigate();
     const { t } = useTranslation("news");
 
     return (
-      <div
+      <m.div
         onClick={() => navigate(`/news/${id}`)}
-        className={`rounded-2xl overflow-hidden cursor-pointer border shadow-sm transition-all duration-300 hover:-translate-y-1 ${
+        whileHover={{ y: -5 }}
+        transition={{ type: "spring", stiffness: 200, damping: 18 }}
+        className={`rounded-2xl overflow-hidden cursor-pointer border shadow-sm duration-300 ${
           isDark
             ? "bg-[#121212]/90 border-amber-500/20 hover:shadow-amber-300/30"
             : "bg-white border-yellow-500/20 hover:shadow-yellow-400/20"
@@ -46,7 +48,7 @@ const NewsCard = React.memo(
             alt={title}
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
           />
         </div>
 
@@ -65,9 +67,7 @@ const NewsCard = React.memo(
           >
             {content}
           </p>
-          <p
-            className={`text-xs ${isDark ? "text-gray-500" : "text-gray-500"}`}
-          >
+          <p className="text-xs text-gray-500">
             {t("by")}:{" "}
             <span
               className={`font-semibold ${
@@ -78,7 +78,7 @@ const NewsCard = React.memo(
             </span>
           </p>
         </div>
-      </div>
+      </m.div>
     );
   }
 );
@@ -89,13 +89,12 @@ const NewsContent = React.memo(({ isDark }: { isDark: boolean }) => {
     queryFn: newsService.getAll,
     queryKey: ["news"],
   });
-
   const { t } = useTranslation("news");
 
   const renderedNews = useMemo(
     () =>
-      news.map((item: any, index: number) => (
-        <NewsCard key={item.id || index} {...item} isDark={isDark} />
+      news.map((item: any, i: number) => (
+        <NewsCard key={item.id || i} {...item} isDark={isDark} />
       )),
     [news, isDark]
   );
@@ -103,46 +102,46 @@ const NewsContent = React.memo(({ isDark }: { isDark: boolean }) => {
   return (
     <>
       <div className="text-center mb-16 px-6">
-        <motion.h2
+        <m.h2
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
           viewport={{ once: true }}
           className={`text-3xl md:text-4xl font-bold mb-3 ${
             isDark ? "text-yellow-400" : "text-yellow-600"
           }`}
         >
           {t("title")}
-        </motion.h2>
+        </m.h2>
 
-        <motion.p
+        <m.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
           viewport={{ once: true }}
           className={`max-w-2xl mx-auto text-lg leading-relaxed ${
             isDark ? "text-gray-300" : "text-gray-600"
           }`}
         >
           {t("description", { brand: "Wajrasena Garda Nusantara" })}
-        </motion.p>
+        </m.p>
       </div>
 
-      <motion.div
+      <m.div
         className="max-w-7xl mx-auto px-6 md:px-8 grid md:grid-cols-2 lg:grid-cols-3 gap-8"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        transition={{ staggerChildren: 0.08 }}
+        transition={{ staggerChildren: 0.05 }}
       >
         {renderedNews}
-      </motion.div>
+      </m.div>
     </>
   );
 });
 
 /* ===================== 🔹 Wrapper ===================== */
-const News = () => {
+const News = React.memo(() => {
   const { t } = useTranslation("news");
   const { theme } = useContext(ThemeContext);
   const isDark = theme === "dark";
@@ -154,63 +153,64 @@ const News = () => {
         isDark ? "bg-transparent text-white" : "bg-transparent text-gray-900"
       }`}
     >
-      <Suspense
-        fallback={
-          <div className="max-w-7xl mx-auto px-6 md:px-8 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <NewsSkeleton key={i} isDark={isDark} />
-            ))}
-          </div>
-        }
-      >
-        <NewsContent isDark={isDark} />
-      </Suspense>
-
-      {/* Tombol View All */}
-      <div className="text-center mt-16">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 250 }}
-          className={`relative font-semibold px-8 py-3 rounded-xl shadow-md overflow-hidden group border ${
-            isDark
-              ? "bg-yellow-500 text-black hover:bg-yellow-400 border-yellow-400/30"
-              : "bg-yellow-500 text-white hover:bg-yellow-400 border-yellow-500/30"
-          }`}
+      <LazyMotion features={domAnimation} strict>
+        <Suspense
+          fallback={
+            <div className="max-w-7xl mx-auto px-6 md:px-8 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <NewsSkeleton key={i} isDark={isDark} />
+              ))}
+            </div>
+          }
         >
-          <span className="relative z-10">{t("button")}</span>
-        </motion.button>
-      </div>
+          <NewsContent isDark={isDark} />
+        </Suspense>
 
-      {/* Partikel Cahaya — versi ringan */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <motion.span
-            key={i}
-            className={`absolute rounded-full ${
-              isDark ? "bg-yellow-400/25" : "bg-yellow-500/30"
+        {/* Tombol View All */}
+        <div className="text-center mt-16 relative z-10">
+          <m.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 250 }}
+            className={`font-semibold px-8 py-3 rounded-xl shadow-md border ${
+              isDark
+                ? "bg-yellow-500 text-black hover:bg-yellow-400 border-yellow-400/30"
+                : "bg-yellow-500 text-white hover:bg-yellow-400 border-yellow-500/30"
             }`}
-            style={{
-              width: Math.random() * 8 + 3,
-              height: Math.random() * 8 + 3,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              transform: "translateZ(0)", // GPU acceleration
-            }}
-            animate={{
-              y: [0, -10, 0],
-              opacity: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: Math.random() * 5 + 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
+          >
+            {t("button")}
+          </m.button>
+        </div>
+
+        {/* Partikel Cahaya */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <m.span
+              key={i}
+              className={`absolute rounded-full ${
+                isDark ? "bg-yellow-400/20" : "bg-yellow-500/25"
+              }`}
+              style={{
+                width: Math.random() * 8 + 4,
+                height: Math.random() * 8 + 4,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                y: [0, -15, 0],
+                opacity: [0.3, 0.8, 0.3],
+              }}
+              transition={{
+                duration: Math.random() * 6 + 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </div>
+      </LazyMotion>
     </section>
   );
-};
+});
 
 export default News;

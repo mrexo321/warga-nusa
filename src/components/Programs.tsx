@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, LazyMotion, m } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { courseService } from "../services/courseService";
 import environment from "../config/environment";
@@ -8,10 +8,14 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ThemeContext } from "../layouts/HomeLayout";
 
-// SkeletonCard optimized
+// Framer Motion performance mode
+const loadFeatures = () =>
+  import("./framerFeatures").then((res) => res.default);
+
+// ⚡ Optimized SkeletonCard
 const SkeletonCard = React.memo(({ isDark }: { isDark: boolean }) => (
   <div
-    className={`rounded-2xl shadow-md overflow-hidden animate-pulse border p-6 h-[360px] ${
+    className={`rounded-2xl shadow-md overflow-hidden animate-pulse border p-6 h-[360px] select-none ${
       isDark
         ? "bg-gradient-to-b from-[#1E1E1E]/80 via-[#141414]/80 to-black/90 border-amber-500/20"
         : "bg-gradient-to-b from-white via-gray-50 to-gray-100 border-yellow-500/20"
@@ -28,11 +32,14 @@ const SkeletonCard = React.memo(({ isDark }: { isDark: boolean }) => (
   </div>
 ));
 
-// ProgramCard optimized
+// ⚡ Optimized ProgramCard
 const ProgramCard = React.memo(
   ({ id, name, description, thumbnail, category, isDark }: any) => (
-    <div
-      className={`relative rounded-2xl shadow-md overflow-hidden group transition-all duration-500 hover:-translate-y-2 cursor-pointer border ${
+    <m.div
+      layout
+      whileHover={{ y: -6 }}
+      transition={{ type: "spring", stiffness: 200, damping: 20 }}
+      className={`relative rounded-2xl shadow-md overflow-hidden group cursor-pointer border transform-gpu will-change-transform ${
         isDark
           ? "bg-gradient-to-b from-[#1E1E1E]/90 via-[#141414]/90 to-black/95 border-amber-500/20 hover:shadow-amber-400/40"
           : "bg-gradient-to-b from-white via-gray-50 to-gray-100 border-yellow-500/20 hover:shadow-yellow-500/30"
@@ -44,10 +51,10 @@ const ProgramCard = React.memo(
           alt={name}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div
-          className={`absolute inset-0 transition-opacity duration-500 ${
+          className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${
             isDark
               ? "bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100"
               : "bg-gradient-to-t from-white/50 via-white/10 to-transparent opacity-0 group-hover:opacity-100"
@@ -105,7 +112,7 @@ const ProgramCard = React.memo(
           </Link>
         </div>
       </div>
-    </div>
+    </m.div>
   )
 );
 
@@ -117,7 +124,7 @@ const Programs = () => {
   const { data: courses, isLoading } = useQuery({
     queryKey: ["programs"],
     queryFn: courseService.getAll,
-    staleTime: 1000 * 60 * 5, // cache 5 menit
+    staleTime: 1000 * 60 * 5,
   });
 
   const renderedCourses = useMemo(() => {
@@ -131,60 +138,62 @@ const Programs = () => {
   }, [courses, isLoading, isDark]);
 
   return (
-    <section
-      id="programs"
-      className={`relative py-24 overflow-hidden transition-colors duration-700 ${
-        isDark ? "bg-transparent text-white" : "bg-transparent text-gray-900"
-      }`}
-    >
-      <div className="text-center mb-16 px-4">
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className={`text-3xl md:text-4xl font-bold mb-3 tracking-wide ${
-            isDark ? "text-yellow-400" : "text-yellow-600"
-          }`}
-        >
-          {t("title")}
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          viewport={{ once: true }}
-          className={`text-lg max-w-2xl mx-auto leading-relaxed ${
-            isDark ? "text-gray-300" : "text-gray-600"
-          }`}
-        >
-          {t("description")}
-        </motion.p>
-      </div>
-
-      <motion.div
-        className="relative z-10 max-w-7xl mx-auto px-6 md:px-8 grid md:grid-cols-2 lg:grid-cols-3 gap-10"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        transition={{ staggerChildren: 0.1 }}
+    <LazyMotion features={loadFeatures} strict>
+      <section
+        id="programs"
+        className={`relative py-24 overflow-hidden transition-colors duration-700 ${
+          isDark ? "bg-transparent text-white" : "bg-transparent text-gray-900"
+        }`}
       >
-        {renderedCourses}
-      </motion.div>
+        <div className="text-center mb-16 px-4">
+          <m.h2
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className={`text-3xl md:text-4xl font-bold mb-3 tracking-wide ${
+              isDark ? "text-yellow-400" : "text-yellow-600"
+            }`}
+          >
+            {t("title")}
+          </m.h2>
+          <m.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            viewport={{ once: true }}
+            className={`text-lg max-w-2xl mx-auto leading-relaxed ${
+              isDark ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
+            {t("description")}
+          </m.p>
+        </div>
 
-      <div className="text-center mt-16">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          className={`relative font-semibold px-8 py-3 rounded-xl shadow-md overflow-hidden group transition-all border ${
-            isDark
-              ? "bg-yellow-500 text-black hover:bg-yellow-400 border-yellow-400/30"
-              : "bg-yellow-500 text-white hover:bg-yellow-400 border-yellow-500/30"
-          }`}
+        <m.div
+          className="relative z-10 max-w-7xl mx-auto px-6 md:px-8 grid md:grid-cols-2 lg:grid-cols-3 gap-10"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          transition={{ staggerChildren: 0.08 }}
         >
-          <span className="relative z-10">{t("buttons.viewAll")}</span>
-        </motion.button>
-      </div>
-    </section>
+          {renderedCourses}
+        </m.div>
+
+        <div className="text-center mt-16">
+          <m.button
+            whileHover={{ scale: 1.05 }}
+            className={`relative font-semibold px-8 py-3 rounded-xl shadow-md overflow-hidden group transition-all border ${
+              isDark
+                ? "bg-yellow-500 text-black hover:bg-yellow-400 border-yellow-400/30"
+                : "bg-yellow-500 text-white hover:bg-yellow-400 border-yellow-500/30"
+            }`}
+          >
+            <span className="relative z-10">{t("buttons.viewAll")}</span>
+          </m.button>
+        </div>
+      </section>
+    </LazyMotion>
   );
 };
 
