@@ -4,10 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Upload } from "lucide-react";
 import { newsService } from "../../../services/newsService";
 import MainLayout from "../../../layouts/MainLayout";
+import { userService } from "../../../services/userService";
 
 // Dummy Author
 const dummyAuthors = [
@@ -27,6 +28,13 @@ const newsSchema = z.object({
 const AddNews = () => {
   const navigate = useNavigate();
 
+  const { data: authors } = useQuery({
+    queryKey: ["authors"],
+    queryFn: userService.getAll,
+  });
+
+  console.log("authors", authors);
+
   const {
     register,
     handleSubmit,
@@ -34,7 +42,7 @@ const AddNews = () => {
   } = useForm({
     resolver: zodResolver(newsSchema),
     defaultValues: {
-      author_id: dummyAuthors[0].id,
+      author_id: authors?.id,
     },
   });
 
@@ -121,7 +129,7 @@ const AddNews = () => {
                 {...register("author_id")}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:ring-2 focus:ring-amber-500 outline-none"
               >
-                {dummyAuthors.map((a) => (
+                {authors?.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.name}
                   </option>

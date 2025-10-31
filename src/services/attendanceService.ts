@@ -45,4 +45,9 @@ export const attendanceService = {
     const response = await axiosInstance.get(`/attendance/daily?date=${date}`);
     return response.data;
   },
+
+  async weeklyAttendance() {
+    const response = await axiosInstance.get("/attendance/weekly");
+    return response.data.data;
+  },
 };

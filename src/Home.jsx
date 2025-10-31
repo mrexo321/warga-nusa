@@ -6,6 +6,7 @@ import News from "./components/News";
 import About from "./components/About";
 import Footer from "./components/Footer";
 import HomeLayout from "./layouts/HomeLayout";
+import Products from "./components/Products";
 
 const Home = () => {
   return (
@@ -14,6 +15,7 @@ const Home = () => {
       <Programs />
       <News />
       <About />
+      {/* <Products /> */}
     </HomeLayout>
   );
 };

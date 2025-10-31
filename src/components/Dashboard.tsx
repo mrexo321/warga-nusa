@@ -16,6 +16,9 @@ import {
   XCircle,
   CalendarDays,
   ListChecks,
+  LogIn,
+  LogOut,
+  Calendar,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -29,7 +32,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useQuery } from "@tanstack/react-query";
 import { dashboardService } from "../services/dashboardService";
-import { Link, useNavigate } from "react-router-dom";
+import { attendanceService } from "../services/attendanceService";
+import { useNavigate } from "react-router-dom";
 
 // =====================================================
 // ⏰ Komponen Jam
@@ -123,6 +127,13 @@ const Dashboard = () => {
       queryFn: dashboardService.getAll,
     });
 
+    const { data: weekly } = useQuery({
+      queryKey: ["weekly"],
+      queryFn: attendanceService.weeklyAttendance,
+    });
+
+    console.log("Ini Weekly", weekly);
+
     if (isLoading) {
       return (
         <p className="mt-10 text-center text-slate-400 italic">
@@ -141,23 +152,13 @@ const Dashboard = () => {
       kursus: courseMeet ? courseMeet.name : "Tidak Ada Pelatihan",
     };
 
-    const weeklyAttendance = [
-      { name: "Sen", total: 1 },
-      { name: "Sel", total: 1 },
-      { name: "Rab", total: 0 },
-      { name: "Kam", total: 1 },
-      { name: "Jum", total: 1 },
-      { name: "Sab", total: 0 },
-      { name: "Min", total: 0 },
-    ];
-
     return (
       <motion.div
         className="mt-6 md:mt-10 space-y-6 md:space-y-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        {/* ALERT BELUM ABSEN */}
+        {/* === ALERT BELUM ABSEN === */}
         {attend?.status !== "PRESENT" && (
           <div
             onClick={() => navigate("/shift-kehadiran")}
@@ -167,7 +168,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* STATUS HARI INI */}
+        {/* === STATUS HARI INI === */}
         <div className="bg-gradient-to-br from-slate-800/70 to-slate-900/40 border border-slate-700 rounded-2xl p-4 md:p-6 shadow-lg">
           <h3 className="text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
             <ShieldCheck className="text-green-400" size={20} />
@@ -175,7 +176,7 @@ const Dashboard = () => {
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-            {/* Absensi */}
+            {/* ABSENSI */}
             <div className="p-4 bg-slate-800/40 border border-slate-700 rounded-xl">
               <ClipboardList className="text-cyan-400 mx-auto mb-2" size={22} />
               <p className="text-slate-400 text-sm">Status Absensi</p>
@@ -190,13 +191,23 @@ const Dashboard = () => {
               </p>
               {attend?.checkIn && (
                 <p className="text-xs text-slate-400 mt-1">
+                  <LogIn size={12} className="inline mr-1" />
                   CI: {attend.checkIn}
-                  {attend.checkOut && ` | CO: ${attend.checkOut}`}
+                  {attend.checkOut && (
+                    <>
+                      {" "}
+                      | <LogOut size={12} className="inline mr-1" />
+                      CO: {attend.checkOut}
+                    </>
+                  )}
                 </p>
               )}
+              <p className="text-[11px] text-slate-500 mt-2">
+                {attend?.date ? `Tanggal: ${attend.date}` : ""}
+              </p>
             </div>
 
-            {/* Shift */}
+            {/* SHIFT */}
             <div className="p-4 bg-slate-800/40 border border-slate-700 rounded-xl">
               <Clock className="text-blue-400 mx-auto mb-2" size={22} />
               <p className="text-slate-400 text-sm">Shift Anda</p>
@@ -208,25 +219,89 @@ const Dashboard = () => {
                   {todayShift.shift.checkIn} - {todayShift.shift.checkOut}
                 </p>
               )}
+              <p className="text-[11px] text-slate-500 mt-2">
+                {todayShift?.date ? `Tanggal: ${todayShift.date}` : ""}
+              </p>
             </div>
 
-            {/* Kursus */}
+            {/* PELATIHAN */}
             <div
               onClick={() =>
-                navigate(`/course-satpam/detail/${courseMeet?.id}`)
+                courseMeet && navigate(`/course-satpam/detail/${courseMeet.id}`)
               }
-              className="p-4 bg-slate-800/40 border border-slate-700 rounded-xl cursor-pointer hover:bg-slate-700/40 transition"
+              className={`p-4 bg-slate-800/40 border border-slate-700 rounded-xl transition ${
+                courseMeet
+                  ? "cursor-pointer hover:bg-slate-700/40"
+                  : "opacity-70 cursor-not-allowed"
+              }`}
             >
               <BookOpen className="text-amber-400 mx-auto mb-2" size={22} />
               <p className="text-slate-400 text-sm">Pelatihan Hari Ini</p>
               <p className="text-lg font-semibold text-cyan-400 line-clamp-1">
                 {userStatus.kursus}
               </p>
+              {!courseMeet && (
+                <p className="text-xs text-slate-500 mt-1">
+                  Tidak ada jadwal pelatihan
+                </p>
+              )}
             </div>
           </div>
         </div>
 
-        {/* KEHADIRAN MINGGU INI */}
+        {/* === DETAIL DATA HARI INI === */}
+        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 md:p-6 shadow-lg">
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar className="text-amber-400" size={20} />
+            <h3 className="text-base md:text-lg font-semibold">
+              Detail Aktivitas Hari Ini
+            </h3>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4 text-sm md:text-base">
+            {/* SHIFT DETAIL */}
+            {todayShift && (
+              <div className="p-3 border border-slate-700 rounded-xl bg-slate-900/40">
+                <p className="text-slate-400 mb-1">Shift</p>
+                <p className="text-slate-200 font-medium uppercase">
+                  {todayShift.shift.name}
+                </p>
+                <p className="text-slate-400 mt-2">Waktu</p>
+                <p className="text-slate-200 font-medium">
+                  {todayShift.shift.checkIn} - {todayShift.shift.checkOut}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Dibuat: {new Date(todayShift.createdAt).toLocaleString()}
+                </p>
+              </div>
+            )}
+
+            {/* ABSENSI DETAIL */}
+            {attend && (
+              <div className="p-3 border border-slate-700 rounded-xl bg-slate-900/40">
+                <p className="text-slate-400 mb-1">Status Kehadiran</p>
+                <p className="text-slate-200 font-medium">
+                  {attend.status == "PRESENT" ? "Hadir" : "Tidak Hadir"}
+                </p>
+                <p className="text-slate-400 mt-2">Waktu Absen</p>
+                <p className="text-slate-200 font-medium">
+                  {attend.checkIn
+                    ? `Check In: ${attend.checkIn}${
+                        attend.checkOut
+                          ? ` | Check Out: ${attend.checkOut}`
+                          : ""
+                      }`
+                    : "Belum Absen"}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Dibuat: {new Date(attend.createdAt).toLocaleString()}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* === KEHADIRAN MINGGU INI === */}
         <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 md:p-6 shadow-lg">
           <div className="flex items-center gap-2 mb-3 md:mb-4">
             <CalendarCheck className="text-green-400" size={22} />
@@ -235,66 +310,76 @@ const Dashboard = () => {
             </h3>
           </div>
 
-          {/* Grid responsif */}
-          <div
-            className="
-    grid
-    grid-cols-2       /* mobile: 3 kolom */
-    sm:grid-cols-5    /* tablet: 5 kolom */
-    md:grid-cols-7    /* desktop: 7 kolom */
-    gap-3 sm:gap-4 md:gap-5
-    text-center
-  "
-          >
-            {weeklyAttendance.map((day, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.07 }}
-                className="p-3 sm:p-4 rounded-xl border border-slate-700 bg-slate-900/40 flex flex-col items-center justify-center"
-              >
-                <p className="text-[11px] sm:text-xs text-slate-400 mb-1">
-                  {day.name}
-                </p>
+          <div className="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-7 gap-3 sm:gap-4 md:gap-5 text-center">
+            {weekly?.map((item, index) => {
+              const status = item.status;
+              const todayIndex = (new Date().getDay() + 6) % 7; // Senin = 0
+              const dayNames = [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+              ];
+              const currentDayIndex = dayNames.indexOf(item.day);
 
-                <div
-                  className={`mx-auto w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full font-bold ${
-                    day.total === 1
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-rose-500/20 text-rose-400"
-                  }`}
+              // Warna status
+              let bgColor = "";
+              let textColor = "";
+              let symbol = "";
+
+              switch (status) {
+                case "PRESENT":
+                  bgColor = "bg-green-500/20";
+                  textColor = "text-green-400";
+                  symbol = "✓";
+                  break;
+                case "ABSENT":
+                  bgColor = "bg-rose-500/20";
+                  textColor = "text-rose-400";
+                  symbol = "×";
+                  break;
+                case "UPCOMING":
+                  bgColor = "bg-slate-600/20";
+                  textColor = "text-slate-400";
+                  symbol = "-";
+                  break;
+                default:
+                  bgColor = "bg-slate-700/30";
+                  textColor = "text-slate-400";
+                  symbol = "?";
+              }
+
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.07 }}
+                  className="p-3 sm:p-4 rounded-xl border border-slate-700 bg-slate-900/40 flex flex-col items-center justify-center"
                 >
-                  {day.total === 1 ? "✓" : "×"}
-                </div>
-
-                {index === new Date().getDay() - 1 && (
-                  <p className="text-[10px] sm:text-[11px] text-cyan-400 mt-1 font-medium">
-                    Hari Ini
+                  <p className="text-[11px] sm:text-xs text-slate-400 mb-1">
+                    {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"][index]}
                   </p>
-                )}
-              </motion.div>
-            ))}
+
+                  <div
+                    className={`mx-auto w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full font-bold ${bgColor} ${textColor}`}
+                  >
+                    {symbol}
+                  </div>
+
+                  {currentDayIndex === todayIndex && (
+                    <p className="text-[10px] sm:text-[11px] text-cyan-400 mt-1 font-medium">
+                      Hari Ini
+                    </p>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
-
-        {/* Kursus Aktif Detail */}
-        {/* {courseMeet && (
-          <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 md:p-6 shadow-lg">
-            <h3 className="text-base md:text-lg font-semibold mb-2 text-amber-400">
-              Kursus Aktif Saat Ini
-            </h3>
-            <p className="text-slate-300 font-medium">{courseMeet.name}</p>
-            <p className="text-sm text-slate-400 mt-1">
-              Mulai:{" "}
-              {new Date(
-                courseMeet.courseMeeting[0].startAt
-              ).toLocaleTimeString()}{" "}
-              | Selesai:{" "}
-              {new Date(courseMeet.courseMeeting[0].endAt).toLocaleTimeString()}
-            </p>
-          </div>
-        )} */}
       </motion.div>
     );
   };
@@ -312,6 +397,8 @@ const Dashboard = () => {
     const startDate = data?.weeklyAttendance?.startDate;
     const endDate = data?.weeklyAttendance?.endDate;
     const activityLogs = data?.activityLogs || [];
+
+    console.log("Activity Log", activityLogs);
 
     console.log("dashboard data", data);
 
@@ -431,9 +518,11 @@ const Dashboard = () => {
                 >
                   <div className="absolute left-3 top-2 w-2 h-2 rounded-full bg-cyan-400 group-hover:scale-125 transition-transform"></div>
                   <div>
-                    <p className="text-slate-100 font-medium">{log.activity}</p>
+                    <p className="text-slate-100 font-medium">
+                      {log.eventMessage}
+                    </p>
                     <p className="text-xs text-slate-500">
-                      {new Date(log.timestamp).toLocaleString()}
+                      {new Date(log.eventTimestamp).toLocaleString()}
                     </p>
                   </div>
                 </div>

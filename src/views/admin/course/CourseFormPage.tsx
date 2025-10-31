@@ -129,6 +129,7 @@ const CourseFormPage = () => {
   const isEdit = Boolean(id);
   const [showAddMeeting, setShowAddMeeting] = useState(false);
   const [showAddMaterial, setShowAddMaterial] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
 
   // === FORM KURSUS ===
   const { register, handleSubmit, reset } = useForm<CourseValues>({
@@ -257,9 +258,28 @@ const CourseFormPage = () => {
         <form
           onSubmit={handleSubmit((values) => {
             const formData = new FormData();
-            Object.entries(values).forEach(([key, val]) => {
-              if (val) formData.append(key, val as any);
-            });
+
+            // Jika sedang edit
+            if (isEdit) {
+              formData.append("name", values.name);
+              formData.append("code", values.code);
+              formData.append("description", values.description);
+
+              // Jika thumbnail diubah, baru tambahkan
+              if (values.thumbnail && values.thumbnail[0]) {
+                formData.append("thumbnail", values.thumbnail[0]);
+              }
+            } else {
+              // Jika tambah baru
+              Object.entries(values).forEach(([key, val]) => {
+                if (val instanceof FileList && val.length > 0) {
+                  formData.append(key, val[0]);
+                } else if (val) {
+                  formData.append(key, val as any);
+                }
+              });
+            }
+
             saveCourse.mutate(formData);
           })}
           className="bg-slate-800/40 p-6 rounded-lg space-y-4 border border-slate-700"
@@ -291,7 +311,46 @@ const CourseFormPage = () => {
 
           <div>
             <label className="block text-sm mb-1">Thumbnail</label>
-            <input type="file" {...register("thumbnail")} />
+            <input
+              type="file"
+              accept="image/*"
+              {...register("thumbnail")}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setPreview(URL.createObjectURL(file));
+                }
+              }}
+              className="block w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4
+      file:rounded-md file:border-0 file:text-sm file:font-semibold
+      file:bg-amber-500 file:text-slate-900 hover:file:bg-amber-400"
+            />
+
+            {/* === Preview Sebelum (gambar lama) === */}
+            {isEdit && course?.thumbnail && (
+              <div className="mt-3">
+                <p className="text-xs text-slate-400 mb-1">
+                  Thumbnail saat ini:
+                </p>
+                <img
+                  src={`${environment.IMAGE_URL}${course.thumbnail}`}
+                  alt="Current thumbnail"
+                  className="w-40 h-24 object-cover rounded-md border border-slate-700 shadow-sm"
+                />
+              </div>
+            )}
+
+            {/* === Preview Sesudah (gambar baru dipilih) === */}
+            {preview && (
+              <div className="mt-3">
+                <p className="text-xs text-slate-400 mb-1">Thumbnail baru:</p>
+                <img
+                  src={preview}
+                  alt="Preview thumbnail"
+                  className="w-40 h-24 object-cover rounded-md border border-blue-500 shadow-md"
+                />
+              </div>
+            )}
           </div>
 
           <button

@@ -165,7 +165,7 @@ const Footer = () => {
               </p>
               <p className="flex items-center gap-2">
                 <MapPin
-                  size={16}
+                  size={32}
                   className={isDark ? "text-yellow-400" : "text-yellow-600"}
                 />
                 {t("contact.address")}

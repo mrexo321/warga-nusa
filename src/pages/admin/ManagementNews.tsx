@@ -8,6 +8,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { userService } from "../../services/userService";
 
 // === Dummy Author (UUID) ===
 const dummyAuthors = [
@@ -34,7 +35,6 @@ const ManagementNews = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const navigate = useNavigate();
-
   // === Fetch Data ===
   const {
     data: newsList,

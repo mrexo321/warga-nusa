@@ -36,6 +36,8 @@ const Attendance = () => {
 
   const todayAttendances = data?.data || [];
 
+  console.log(todayAttendances);
+
   // Statistik harian
   const stats = {
     hadir: todayAttendances.filter((d) => d.status === "PRESENT").length,

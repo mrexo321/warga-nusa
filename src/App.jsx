@@ -28,6 +28,7 @@ import AddShift from "./views/admin/shift/AssignShift";
 import AddCourse from "./views/admin/course/AddCourse";
 import HomeNewsPreview from "./views/home/news/HomeNewsPreview";
 import AssignShift from "./views/admin/shift/AssignShift";
+import ProductDetail from "./components/ProductDetail";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
       <Route path="/contact-us" element={<ContactUs />} />
       <Route path="/homeprogram/:id" element={<HomeDetailCourse />} />
       <Route path="/news/:id" element={<HomeNewsPreview />} />
+      <Route path="/product/:id" element={<ProductDetail />} />
 
       <Route element={<ProtectedRoutes allowedRoles={["admin", "user"]} />}>
         <Route path="/dashboard" element={<Dashboard />} />
