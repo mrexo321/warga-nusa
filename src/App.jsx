@@ -29,6 +29,8 @@ import AddCourse from "./views/admin/course/AddCourse";
 import HomeNewsPreview from "./views/home/news/HomeNewsPreview";
 import AssignShift from "./views/admin/shift/AssignShift";
 import ProductDetail from "./components/ProductDetail";
+import TaskReport from "./pages/admin/TaskReport";
+import Patrol from "./pages/user/Patrol";
 
 function App() {
   return (
@@ -46,6 +48,7 @@ function App() {
 
       <Route element={<ProtectedRoutes allowedRoles={["admin", "user"]} />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/patrol" element={<Patrol />} />
       </Route>
       <Route element={<ProtectedRoutes allowedRoles={["admin"]} />}>
         <Route path="/users" element={<ManagementUser />} />
@@ -60,6 +63,7 @@ function App() {
         <Route path="/courses/:id" element={<CourseDetailMaterials />} />
         <Route path="/courses/preview/:id" element={<PreviewCourse />} />
         <Route path="/courses/edit/:id" element={<CourseFormPage />} />
+        <Route path="/task-report" element={<TaskReport />} />
       </Route>
 
       <Route element={<ProtectedRoutes allowedRoles={["user"]} />}>

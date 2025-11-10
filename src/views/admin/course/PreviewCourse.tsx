@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { courseService } from "../../../services/courseService";
 import environment from "../../../config/environment";
+import ParticipantTable from "../../../components/ParticipantTable";
 
 const PreviewCourse = () => {
   const { id } = useParams<{ id: string }>();
@@ -67,14 +68,13 @@ const PreviewCourse = () => {
             </div>
           </div>
 
-          {/* Deskripsi */}
-          <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-white border-b border-slate-700/50 pb-2 mb-3">
-              Deskripsi Kursus
+          {/* === BLOCK CARD PESERTA DENGAN CHECKBOX HADIR === */}
+          <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 shadow-lg mt-8">
+            <h2 className="text-lg font-semibold text-white border-b border-slate-700/50 pb-3 mb-4 flex items-center gap-2">
+              <User className="text-sky-400" />
+              List Peserta
             </h2>
-            <p className="text-slate-300 leading-relaxed whitespace-pre-line">
-              {course.description}
-            </p>
+            <ParticipantTable />
           </div>
 
           {/* Materi yang sedang dibuka */}
@@ -138,8 +138,7 @@ const PreviewCourse = () => {
                   </div>
                 )}
               </div>
-
-              {/* Daftar User yang sudah absen */}
+              {/* Daftar User yang sudah absen
               <div className="bg-slate-900/40 border border-slate-700/40 rounded-xl p-5">
                 <h3 className="text-base font-semibold text-white border-b border-slate-700/50 pb-2 mb-4 flex items-center gap-2">
                   <User className="text-emerald-400" />
@@ -197,7 +196,7 @@ const PreviewCourse = () => {
                     Belum ada peserta yang absen di materi ini.
                   </p>
                 )}
-              </div>
+              </div> */}
             </div>
           )}
         </div>
@@ -241,7 +240,15 @@ const PreviewCourse = () => {
               ))}
             </div>
           </div>
-
+          {/* Deskripsi */}
+          <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-white border-b border-slate-700/50 pb-2 mb-3">
+              Deskripsi Kursus
+            </h2>
+            <p className="text-slate-300 leading-relaxed whitespace-pre-line">
+              {course.description}
+            </p>
+          </div>
           {/* QR Code Absensi */}
           {selectedMeeting?.qrCodeDataUrl && (
             <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700/60 rounded-2xl p-6 flex flex-col items-center text-center shadow-xl overflow-hidden">

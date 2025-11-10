@@ -19,6 +19,11 @@ import {
   LogIn,
   LogOut,
   Calendar,
+  Sun,
+  Cloud,
+  CloudSnow,
+  CloudRain,
+  MapPin,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -39,77 +44,134 @@ import { useNavigate } from "react-router-dom";
 // ⏰ Komponen Jam
 // =====================================================
 // Ganti seluruh komponen ClockWidget di atas dengan versi ini:
-const ClockWidget = () => {
-  const [time, setTime] = useState(new Date());
+const WeatherWidget = () => {
+  const [weather, setWeather] = useState<any>(null);
+  const [location, setLocation] = useState<string>("Memuat lokasi...");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(interval);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          fetchWeather(latitude, longitude);
+          fetchLocation(latitude, longitude);
+        },
+        () => {
+          // fallback ke Jakarta jika user tolak lokasi
+          fetchWeather(-6.2, 106.816666);
+          fetchLocation(-6.2, 106.816666);
+        }
+      );
+    } else {
+      fetchWeather(-6.2, 106.816666);
+      fetchLocation(-6.2, 106.816666);
+    }
   }, []);
 
-  const hours = time.getHours().toString().padStart(2, "0");
-  const minutes = time.getMinutes().toString().padStart(2, "0");
-  const seconds = time.getSeconds().toString().padStart(2, "0");
+  const fetchWeather = async (lat: number, lon: number) => {
+    try {
+      const res = await fetch(
+        `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`,
+        {
+          headers: { "User-Agent": "DashboardApp/1.0" },
+        }
+      );
+      const data = await res.json();
+      const timeseries = data.properties.timeseries[0];
+      const details = timeseries.data.instant.details;
+      const symbol =
+        timeseries.data.next_1_hours?.summary?.symbol_code || "clear";
+
+      setWeather({
+        temp: details.air_temperature,
+        humidity: details.relative_humidity,
+        wind: details.wind_speed,
+        symbol,
+      });
+    } catch {
+      setError("Gagal memuat cuaca");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🌍 Ambil nama lokasi (tanpa API key)
+  const fetchLocation = async (lat: number, lon: number) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+      );
+      const data = await res.json();
+      const name =
+        data.address.city ||
+        data.address.town ||
+        data.address.village ||
+        data.address.state ||
+        "Lokasi tidak diketahui";
+      setLocation(name);
+    } catch {
+      setLocation("Tidak diketahui");
+    }
+  };
+
+  const getIcon = (symbol: string) => {
+    if (symbol.includes("rain"))
+      return <CloudRain className="text-cyan-400" size={34} />;
+    if (symbol.includes("snow"))
+      return <CloudSnow className="text-blue-300" size={34} />;
+    if (symbol.includes("cloud"))
+      return <Cloud className="text-slate-300" size={34} />;
+    return <Sun className="text-yellow-300" size={34} />;
+  };
+
+  if (loading)
+    return (
+      <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 text-cyan-300 text-center">
+        Memuat cuaca...
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 text-rose-400 text-center">
+        {error}
+      </div>
+    );
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6 }}
-      className="relative bg-gradient-to-br from-slate-900/70 via-slate-800/70 to-slate-900/70 border border-cyan-400/20 px-6 py-4 rounded-2xl shadow-[0_0_12px_rgba(34,211,238,0.2)] flex flex-col items-center justify-center select-none"
+      className="relative w-full max-w-sm bg-gradient-to-br from-slate-900/70 via-slate-800/70 to-slate-900/70 border border-cyan-400/20 px-8 py-5 rounded-2xl shadow-[0_0_18px_rgba(34,211,238,0.25)] flex flex-col items-center justify-center select-none"
     >
-      {/* Efek Glow Luar */}
+      {/* Efek cahaya latar */}
       <div className="absolute inset-0 rounded-2xl bg-cyan-400/5 blur-2xl" />
 
-      {/* Jam Digital */}
-      <div className="relative z-10 flex items-end gap-1 font-mono">
-        <span className="text-4xl md:text-5xl font-bold text-cyan-300 drop-shadow-[0_0_10px_rgba(34,211,238,0.6)] tracking-wider">
-          {hours}
-        </span>
-        <motion.span
-          key={seconds}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 1, 0] }}
-          transition={{ duration: 1 }}
-          className="text-4xl md:text-5xl font-bold text-cyan-400/80"
-        >
-          :
-        </motion.span>
-        <span className="text-4xl md:text-5xl font-bold text-cyan-300 drop-shadow-[0_0_10px_rgba(34,211,238,0.6)] tracking-wider">
-          {minutes}
-        </span>
-        <span className="text-base text-cyan-400/80 ml-1 pb-1">{seconds}</span>
-      </div>
+      <div className="relative z-10 text-center space-y-2">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <MapPin className="text-cyan-400" size={18} />
+          <span className="text-base font-medium text-cyan-300 tracking-wide">
+            {location}
+          </span>
+        </div>
 
-      {/* Hari dan tanggal */}
-      <p className="text-sm text-cyan-200/70 mt-2 font-light">
-        {time.toLocaleDateString("id-ID", {
-          weekday: "long",
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        })}
-      </p>
+        {getIcon(weather.symbol)}
+
+        <p className="text-4xl font-bold text-cyan-300 mt-1 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">
+          {Math.round(weather.temp)}°C
+        </p>
+
+        <p className="text-sm text-cyan-200/80 mt-1">
+          💨 {weather.wind} m/s · 💧 {weather.humidity}%
+        </p>
+      </div>
     </motion.div>
   );
 };
 
-// =====================================================
-// 📊 Data Grafik Dummy
-// =====================================================
-const chartData = [
-  { name: "Sen", total: 10 },
-  { name: "Sel", total: 8 },
-  { name: "Rab", total: 12 },
-  { name: "Kam", total: 9 },
-  { name: "Jum", total: 11 },
-  { name: "Sab", total: 7 },
-  { name: "Min", total: 6 },
-];
-
-// =====================================================
-// 🧭 Komponen Utama Dashboard
-// =====================================================
 const Dashboard = () => {
   const user = useSelector((state: RootState) => state.user);
 
@@ -425,65 +487,164 @@ const Dashboard = () => {
 
     return (
       <motion.div
-        className="mt-10 space-y-8"
+        className="mt-10 space-y-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        {/* === HEADER INFO MINGGUAN === */}
-        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="text-cyan-400" size={22} />
-              <h3 className="text-lg font-semibold text-slate-100">
-                Ringkasan Kehadiran Minggu Ini
-              </h3>
+        {/* === BAGIAN ATAS: Grafik & Ringkasan === */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* === GRAFIK ABSENSI MINGGUAN === */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-slate-900/70 via-slate-800/80 to-slate-900/70 border border-slate-700/60 rounded-2xl p-8 shadow-[0_0_20px_rgba(34,211,238,0.15)]">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <CalendarDays className="text-cyan-400" size={24} />
+                <h3 className="text-lg font-semibold text-slate-100">
+                  Ringkasan Kehadiran Minggu Ini
+                </h3>
+              </div>
+              <p className="text-sm text-slate-400">
+                <span className="text-cyan-300 font-medium">
+                  {startDate} – {endDate}
+                </span>
+              </p>
             </div>
-            <p className="text-sm text-slate-400">
-              Periode:{" "}
-              <span className="text-cyan-300 font-medium">
-                {startDate} - {endDate}
-              </span>
-            </p>
+
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="name" stroke="#94a3b8" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1e293b",
+                    borderRadius: "10px",
+                    border: "1px solid #334155",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Kehadiran"
+                  stroke="#22d3ee"
+                  strokeWidth={2.5}
+                  dot={{ fill: "#22d3ee", r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+
+            <div className="grid grid-cols-3 mt-6 text-center">
+              {[
+                {
+                  label: "Total Hari",
+                  value: weeklyAttendance.length,
+                  color: "text-cyan-300",
+                },
+                {
+                  label: "Total Hadir",
+                  value: weeklyAttendance.filter((d) => d.present > 0).length,
+                  color: "text-green-400",
+                },
+                {
+                  label: "Persentase",
+                  value: `${(
+                    (weeklyAttendance.filter((d) => d.present > 0).length /
+                      weeklyAttendance.length) *
+                    100
+                  ).toFixed(0)}%`,
+                  color: "text-amber-400",
+                },
+              ].map((item, idx) => (
+                <div key={idx}>
+                  <p className="text-slate-400 text-sm">{item.label}</p>
+                  <p className={`text-xl font-semibold ${item.color}`}>
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* === GRAFIK ABSENSI MINGGUAN === */}
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="name" stroke="#94a3b8" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1e293b",
-                  borderRadius: "8px",
-                  border: "1px solid #334155",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="Kehadiran"
-                stroke="#22d3ee"
-                strokeWidth={2}
-                dot={{ fill: "#22d3ee" }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {/* === STATISTIK SAMPING === */}
+          <div className="flex flex-col justify-between space-y-4">
+            {[
+              {
+                icon: <Clock className="text-cyan-400" size={22} />,
+                label: "Minggu Dimulai",
+                value: startDate,
+              },
+              {
+                icon: <TrendingUp className="text-green-400" size={22} />,
+                label: "Minggu Berakhir",
+                value: endDate,
+              },
+              {
+                icon: <Activity className="text-amber-400" size={22} />,
+                label: "Total Hari Absensi",
+                value: weeklyAttendance.length,
+              },
+              {
+                icon: <ListChecks className="text-blue-400" size={22} />,
+                label: "Hari Hadir",
+                value: weeklyAttendance.filter((d) => d.present > 0).length,
+              },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="bg-slate-800/50 border border-slate-700/70 rounded-2xl p-4 text-center hover:translate-y-[-3px] hover:border-cyan-400/30 hover:shadow-[0_0_15px_rgba(34,211,238,0.15)] transition-all duration-300"
+              >
+                <div className="flex justify-center mb-1">{item.icon}</div>
+                <p className="text-slate-400 text-sm">{item.label}</p>
+                <p className="text-lg font-semibold text-cyan-300 mt-1">
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-          <div className="flex justify-around mt-6 text-center">
-            <div>
-              <p className="text-sm text-slate-400">Total Hari</p>
-              <p className="text-xl text-cyan-300 font-semibold">
-                {weeklyAttendance.length}
-              </p>
+        {/* === BAGIAN BAWAH: Aktivitas & Statistik Lain === */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* === AKTIVITAS TERBARU === */}
+          <div className="bg-gradient-to-br from-slate-900/70 via-slate-800/80 to-slate-900/70 border border-slate-700/60 rounded-2xl p-8 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+            <div className="flex items-center gap-3 mb-5">
+              <ListChecks className="text-emerald-400" size={22} />
+              <h3 className="text-lg font-semibold text-slate-100">
+                Aktivitas Terbaru
+              </h3>
             </div>
-            <div>
-              <p className="text-sm text-slate-400">Total Hadir</p>
-              <p className="text-xl text-green-400 font-semibold">
-                {weeklyAttendance.filter((d) => d.present > 0).length}
+
+            {activityLogs.length === 0 ? (
+              <p className="text-slate-400 text-sm italic">
+                Belum ada aktivitas tercatat.
               </p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-400">Persentase</p>
-              <p className="text-xl text-amber-400 font-semibold">
+            ) : (
+              <div className="space-y-4 relative">
+                <div className="absolute left-5 top-2 bottom-2 w-px bg-slate-700"></div>
+                {activityLogs.map((log, idx) => (
+                  <div
+                    key={idx}
+                    className="relative pl-10 flex items-start gap-3 group"
+                  >
+                    <div className="absolute left-4 top-2 w-2 h-2 rounded-full bg-emerald-400 group-hover:scale-125 transition-transform"></div>
+                    <div>
+                      <p className="text-slate-100 font-medium">
+                        {log.eventMessage}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {new Date(log.eventTimestamp).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* === STATISTIK RINGKASAN TAMBAHAN / INFO KINERJA === */}
+          <div className="bg-gradient-to-br from-slate-900/70 via-slate-800/80 to-slate-900/70 border border-slate-700/60 rounded-2xl p-8 shadow-[0_0_15px_rgba(34,211,238,0.1)] flex flex-col justify-center items-center">
+            <p className="text-slate-400 text-center mb-3">
+              Ringkasan Mingguan
+            </p>
+            <div className="text-center space-y-3">
+              <p className="text-5xl font-bold text-cyan-300">
                 {(
                   (weeklyAttendance.filter((d) => d.present > 0).length /
                     weeklyAttendance.length) *
@@ -491,81 +652,9 @@ const Dashboard = () => {
                 ).toFixed(0)}
                 %
               </p>
+              <p className="text-slate-400">Tingkat Kehadiran</p>
             </div>
           </div>
-        </div>
-
-        {/* === ACTIVITY LOGS === */}
-        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center gap-2 mb-4">
-            <ListChecks className="text-emerald-400" size={22} />
-            <h3 className="text-lg font-semibold text-slate-100">
-              Aktivitas Terbaru
-            </h3>
-          </div>
-
-          {activityLogs.length === 0 ? (
-            <p className="text-slate-400 text-sm italic">
-              Belum ada aktivitas tercatat.
-            </p>
-          ) : (
-            <div className="space-y-4 relative">
-              <div className="absolute left-4 top-2 bottom-2 w-px bg-slate-700"></div>
-              {activityLogs.map((log, idx) => (
-                <div
-                  key={idx}
-                  className="relative pl-10 flex items-start gap-3 group"
-                >
-                  <div className="absolute left-3 top-2 w-2 h-2 rounded-full bg-cyan-400 group-hover:scale-125 transition-transform"></div>
-                  <div>
-                    <p className="text-slate-100 font-medium">
-                      {log.eventMessage}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {new Date(log.eventTimestamp).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* === STATISTIK TAMBAHAN === */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            {
-              icon: <Clock className="text-cyan-400" size={22} />,
-              label: "Minggu Dimulai",
-              value: startDate,
-            },
-            {
-              icon: <TrendingUp className="text-green-400" size={22} />,
-              label: "Minggu Berakhir",
-              value: endDate,
-            },
-            {
-              icon: <Activity className="text-amber-400" size={22} />,
-              label: "Total Hari Absensi",
-              value: weeklyAttendance.length,
-            },
-            {
-              icon: <ListChecks className="text-blue-400" size={22} />,
-              label: "Hari Hadir",
-              value: weeklyAttendance.filter((d) => d.present > 0).length,
-            },
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 text-center hover:bg-slate-800/80 transition-all duration-300"
-            >
-              <div className="flex justify-center mb-2">{item.icon}</div>
-              <p className="text-slate-400 text-sm">{item.label}</p>
-              <p className="text-xl font-semibold text-cyan-300">
-                {item.value}
-              </p>
-            </div>
-          ))}
         </div>
       </motion.div>
     );
@@ -593,7 +682,7 @@ const Dashboard = () => {
               Lihat status absensi, shift, dan Pelatihan Anda hari ini.
             </p>
           </div>
-          <ClockWidget />
+          <WeatherWidget />
         </div>
 
         {/* PROFILE */}

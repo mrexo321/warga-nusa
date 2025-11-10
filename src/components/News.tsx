@@ -89,6 +89,9 @@ const NewsContent = React.memo(({ isDark }: { isDark: boolean }) => {
     queryFn: newsService.getAll,
     queryKey: ["news"],
   });
+
+  console.log(news);
+
   const { t } = useTranslation("news");
 
   const renderedNews = useMemo(

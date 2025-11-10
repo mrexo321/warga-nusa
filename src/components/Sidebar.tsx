@@ -26,12 +26,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { path: "/courses", label: "Manajemen Pelatihan" },
     { path: "/news", label: "Manajemen Berita" },
     { path: "/gallery", label: "Manajemen Galeri" },
+    { path: "/patrol", label: "Patroli" },
+    { path: "/task-report", label: "Laporan Penugasan" },
   ];
 
   const userTabs = [
     { path: "/dashboard", label: "Dashboard" },
     { path: "/shift-kehadiran", label: "Shift & Kehadiran" },
     { path: "/course-satpam", label: "Kursus" },
+    { path: "/patrol", label: "Patroli" },
   ];
 
   const tabs = user.role === "admin" ? adminTabs : userTabs;

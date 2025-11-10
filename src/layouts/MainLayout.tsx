@@ -32,6 +32,7 @@ const MainLayout = ({ children }) => {
     { path: "/courses", label: "Pelatihan", icon: Users },
     { path: "/news", label: "Berita", icon: Calendar },
     { path: "/gallery", label: "Galeri", icon: Users },
+    { path: "/task-report", label: "Laporan Penugasan", icon: Users },
   ];
 
   const userTabs = [

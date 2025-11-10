@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import MainLayout from "../../layouts/MainLayout";
-import { Plus, Edit3, Eye, Trash2, Search } from "lucide-react";
+import { Plus, Edit3, Eye, Trash2, Search, AlertTriangle } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { courseService } from "../../services/courseService";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,10 @@ import environment from "../../config/environment";
 
 const ManagementCourse = () => {
   const [search, setSearch] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<null | {
+    id: string;
+    name: string;
+  }>(null);
   const navigate = useNavigate();
 
   // Ambil semua Pelatihan
@@ -32,7 +36,11 @@ const ManagementCourse = () => {
     mutationFn: (id: string) => courseService.delete(id),
     onSuccess: () => {
       toast.success("Pelatihan berhasil dihapus");
+      setConfirmDelete(null);
       refetch();
+    },
+    onError: () => {
+      toast.error("Gagal menghapus Pelatihan");
     },
   });
 
@@ -141,8 +149,7 @@ const ManagementCourse = () => {
 
                     <button
                       onClick={() =>
-                        confirm("Yakin ingin menghapus Pelatihan ini?") &&
-                        deleteMutation.mutate(course.id)
+                        setConfirmDelete({ id: course.id, name: course.name })
                       }
                       className="text-red-400 hover:text-red-300 transition"
                     >
@@ -161,6 +168,45 @@ const ManagementCourse = () => {
           </p>
         )}
       </div>
+
+      {/* === MODAL KONFIRMASI HAPUS === */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-lg p-8 w-[90%] max-w-md relative">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertTriangle className="text-amber-400" size={28} />
+              <h2 className="text-xl font-semibold text-white">
+                Konfirmasi Hapus
+              </h2>
+            </div>
+
+            <p className="text-slate-400 mb-6">
+              Apakah kamu yakin ingin menghapus pelatihan{" "}
+              <span className="text-white font-semibold">
+                “{confirmDelete.name}”
+              </span>
+              ?<br />
+              Tindakan ini tidak dapat dibatalkan.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="px-4 py-2 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 transition"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => deleteMutation.mutate(confirmDelete.id)}
+                disabled={deleteMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition disabled:opacity-50"
+              >
+                {deleteMutation.isPending ? "Menghapus..." : "Hapus"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };
