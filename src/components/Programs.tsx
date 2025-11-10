@@ -180,7 +180,7 @@ const Programs = () => {
           {renderedCourses}
         </m.div>
 
-        <div className="text-center mt-16">
+        {/* <div className="text-center mt-16">
           <m.button
             whileHover={{ scale: 1.05 }}
             className={`relative font-semibold px-8 py-3 rounded-xl shadow-md overflow-hidden group transition-all border ${
@@ -191,7 +191,7 @@ const Programs = () => {
           >
             <span className="relative z-10">{t("buttons.viewAll")}</span>
           </m.button>
-        </div>
+        </div> */}
       </section>
     </LazyMotion>
   );

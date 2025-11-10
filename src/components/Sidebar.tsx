@@ -33,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const userTabs = [
     { path: "/dashboard", label: "Dashboard" },
     { path: "/shift-kehadiran", label: "Shift & Kehadiran" },
-    { path: "/course-satpam", label: "Kursus" },
+    { path: "/course-satpam", label: "Pelatihan" },
     { path: "/patrol", label: "Patroli" },
   ];
 

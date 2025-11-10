@@ -221,7 +221,7 @@ const Dashboard = () => {
         animate={{ opacity: 1 }}
       >
         {/* === ALERT BELUM ABSEN === */}
-        {attend?.status !== "PRESENT" && (
+        {todayShift && (
           <div
             onClick={() => navigate("/shift-kehadiran")}
             className="bg-rose-500/20 border border-rose-600 text-rose-300 cursor-pointer p-3 rounded-xl text-sm text-center animate-pulse"

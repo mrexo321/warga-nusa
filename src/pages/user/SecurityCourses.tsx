@@ -10,7 +10,7 @@ import environment from "../../config/environment";
 const SecurityCourses = () => {
   const [activeTab, setActiveTab] = useState<"my" | "all">("my");
 
-  // ✅ Query semua kursus
+  // ✅ Query semua Pelatihan
   const {
     data: allCourses = [],
     isLoading: isAllLoading,
@@ -20,11 +20,13 @@ const SecurityCourses = () => {
     queryFn: courseService.getAll,
     enabled: activeTab === "all",
     onError: (err: any) => {
-      toast.error(err?.response?.data?.message || "Gagal memuat semua kursus");
+      toast.error(
+        err?.response?.data?.message || "Gagal memuat semua Pelatihan"
+      );
     },
   });
 
-  // ✅ Query kursus yang diambil user
+  // ✅ Query Pelatihan yang diambil user
   const {
     data: myCourses = [],
     isLoading: isMyLoading,
@@ -34,7 +36,9 @@ const SecurityCourses = () => {
     queryFn: courseService.getTakenCourse,
     enabled: activeTab === "my" || activeTab === "all", // aktif di kedua tab agar bisa tahu mana yang sudah diambil
     onError: (err: any) => {
-      toast.error(err?.response?.data?.message || "Gagal memuat kursus saya");
+      toast.error(
+        err?.response?.data?.message || "Gagal memuat Pelatihan saya"
+      );
     },
   });
 
@@ -43,7 +47,7 @@ const SecurityCourses = () => {
   const isError = activeTab === "my" ? isMyError : isAllError;
   const courses = activeTab === "my" ? myCourses : allCourses;
 
-  // Ambil ID kursus yang sudah diambil user
+  // Ambil ID Pelatihan yang sudah diambil user
   const takenCourseIds = new Set(myCourses.map((c: any) => c.id));
 
   return (
@@ -52,7 +56,7 @@ const SecurityCourses = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-3xl font-bold text-white tracking-wide">
-            📘 Kursus Satpam
+            📘 Pelatihan Satpam
           </h1>
 
           <div className="flex bg-slate-800/40 border border-slate-700/50 rounded-xl p-1 w-fit">
@@ -64,7 +68,7 @@ const SecurityCourses = () => {
                   : "text-slate-300 hover:text-white"
               }`}
             >
-              Kursus Saya
+              Pelatihan Saya
             </button>
             <button
               onClick={() => setActiveTab("all")}
@@ -74,7 +78,7 @@ const SecurityCourses = () => {
                   : "text-slate-300 hover:text-white"
               }`}
             >
-              Semua Kursus
+              Semua Pelatihan
             </button>
           </div>
         </div>
@@ -82,7 +86,7 @@ const SecurityCourses = () => {
         {/* State Loading / Error */}
         {isLoading && (
           <p className="text-center text-slate-400 animate-pulse">
-            Memuat daftar kursus...
+            Memuat daftar Pelatihan...
           </p>
         )}
         {isError && (
@@ -91,13 +95,13 @@ const SecurityCourses = () => {
           </p>
         )}
 
-        {/* Daftar Kursus */}
+        {/* Daftar Pelatihan */}
         {!isLoading && courses.length > 0 && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((course: any) => {
               const isTaken = takenCourseIds.has(course.id);
 
-              // ✅ hanya redup kalau di tab 'all' dan kursus sudah diambil
+              // ✅ hanya redup kalau di tab 'all' dan Pelatihan sudah diambil
               const isDimmed = activeTab === "all" && isTaken;
 
               return (
@@ -162,7 +166,7 @@ const SecurityCourses = () => {
 
         {!isLoading && courses.length === 0 && (
           <p className="text-center text-slate-400 text-sm mt-10">
-            Tidak ada kursus yang tersedia saat ini.
+            Tidak ada Pelatihan yang tersedia saat ini.
           </p>
         )}
       </div>

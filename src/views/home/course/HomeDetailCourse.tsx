@@ -142,7 +142,7 @@ const HomeDetailCourse = () => {
                 Mulai Belajar
               </button>
               <button
-                onClick={() => navigate("/program")}
+                onClick={() => navigate("/")}
                 className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold border transition border-yellow-400/40 hover:bg-yellow-400/10`}
               >
                 Lihat Pelatihan Lainnya

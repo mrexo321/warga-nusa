@@ -36,7 +36,7 @@ const PreviewCourse = () => {
     course.courseMeeting.find((m) => m.id === selectedMeeting?.id)
       ?.attendances || [];
 
-  console.log(course);
+  console.log(selectedMeeting);
 
   return (
     <MainLayout>
@@ -74,7 +74,66 @@ const PreviewCourse = () => {
               <User className="text-sky-400" />
               List Peserta
             </h2>
-            <ParticipantTable />
+            {/* <ParticipantTable data={course.courseMeeting} /> */}
+
+            {/* Participant Table  */}
+            <div className="overflow-x-auto max-h-80 overflow-y-auto custom-scrollbar">
+              <table className="min-w-full text-sm text-slate-300 border border-slate-700/60 rounded-xl overflow-hidden">
+                <thead className="bg-slate-900/60 text-slate-200 sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Nama</th>
+                    <th className="px-4 py-3 text-left">Waktu</th>
+                    <th className="px-4 py-3 text-center">Hadir</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedMeeting.attendances.map((attendant, key) => (
+                    <tr className="border-t border-slate-700/50 hover:bg-slate-800/50 transition">
+                      <td className="px-4 py-3 font-medium text-slate-100">
+                        {attendant.user.name}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-3 py-1 rounded-md text-xs font-medium`}
+                        >
+                          {attendant.user.attendAt
+                            ? attendant.user.attendAt
+                            : "-"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <label className="inline-flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            disabled
+                            checked={attendant.status === "present"}
+                            className="appearance-none w-5 h-5 border-2 rounded-md cursor-not-allowed transition-all duration-300
+        checked:bg-green-500 checked:border-green-500 border-gray-400"
+                          />
+                          {attendant.status === "present" && (
+                            <svg
+                              className="absolute w-3 h-3 text-white pointer-events-none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          )}
+                        </label>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Materi yang sedang dibuka */}

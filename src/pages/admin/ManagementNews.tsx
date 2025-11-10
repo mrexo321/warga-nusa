@@ -174,7 +174,7 @@ const ManagementNews = () => {
               <tr className="bg-slate-800/70 text-slate-200 uppercase text-xs tracking-wider">
                 <th className="px-6 py-3 text-left">Judul</th>
                 <th className="px-6 py-3 text-left">Konten</th>
-                <th className="px-6 py-3 text-left">Penulis</th>
+                {/* <th className="px-6 py-3 text-left">Penulis</th> */}
                 <th className="px-6 py-3 text-left">Thumbnail</th>
                 <th className="px-6 py-3 text-center">Aksi</th>
               </tr>
@@ -206,7 +206,7 @@ const ManagementNews = () => {
                           ? news.content.slice(0, 80) + "..."
                           : news.content}
                       </td>
-                      <td className="px-6 py-3">{authorName}</td>
+                      {/* <td className="px-6 py-3">{authorName}</td> */}
                       <td className="px-6 py-3">
                         {news.thumbnail ? (
                           <img
@@ -299,7 +299,7 @@ const ManagementNews = () => {
                 </div>
 
                 {/* Author */}
-                <div>
+                {/* <div>
                   <label className="block text-sm mb-1">Penulis</label>
                   <select
                     {...register("author_id")}
@@ -316,7 +316,7 @@ const ManagementNews = () => {
                       {errors.author_id.message}
                     </p>
                   )}
-                </div>
+                </div> */}
 
                 {/* Thumbnail */}
                 <div>

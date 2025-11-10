@@ -27,7 +27,7 @@ const NewsSkeleton = React.memo(({ isDark }: { isDark: boolean }) => (
 
 /* ===================== 🔹 News Card ===================== */
 const NewsCard = React.memo(
-  ({ id, title, content, thumbnail, author_id, isDark }: any) => {
+  ({ id, title, content, thumbnail, author, isDark }: any) => {
     const navigate = useNavigate();
     const { t } = useTranslation("news");
 
@@ -68,13 +68,13 @@ const NewsCard = React.memo(
             {content}
           </p>
           <p className="text-xs text-gray-500">
-            {t("by")}:{" "}
+            {t("by")}:{}
             <span
               className={`font-semibold ${
                 isDark ? "text-yellow-400" : "text-yellow-600"
               }`}
             >
-              {author_id}
+              {""} {author.name}
             </span>
           </p>
         </div>
@@ -170,7 +170,7 @@ const News = React.memo(() => {
         </Suspense>
 
         {/* Tombol View All */}
-        <div className="text-center mt-16 relative z-10">
+        {/* <div className="text-center mt-16 relative z-10">
           <m.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
@@ -183,7 +183,7 @@ const News = React.memo(() => {
           >
             {t("button")}
           </m.button>
-        </div>
+        </div> */}
 
         {/* Partikel Cahaya */}
         <div className="absolute inset-0 pointer-events-none z-0">

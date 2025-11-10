@@ -65,18 +65,18 @@ const HomeNewsPreview = () => {
               {news.title}
             </motion.h1>
 
-            <p className="text-slate-400 text-sm">
+            {/* <p className="text-slate-400 text-sm">
               Oleh{" "}
               <span className="text-slate-200 font-medium">
                 {news.author_id}
               </span>{" "}
               •{" "}
-              {new Date(news.created_at).toLocaleDateString("id-ID", {
+              {new Date(news.createdAt).toLocaleDateString("id-ID", {
                 day: "numeric",
                 month: "long",
                 year: "numeric",
               })}
-            </p>
+            </p> */}
 
             <motion.div
               initial={{ opacity: 0 }}

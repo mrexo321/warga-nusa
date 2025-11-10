@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, X } from "lucide-react";
 import { newsService } from "../../../services/newsService";
 import MainLayout from "../../../layouts/MainLayout";
 import { userService } from "../../../services/userService";
@@ -22,18 +22,17 @@ const newsSchema = z.object({
   title: z.string().min(3, "Judul minimal 3 karakter"),
   content: z.string().min(10, "Konten minimal 10 karakter"),
   thumbnail: z.any().optional(),
-  author_id: z.string().uuid("Penulis tidak valid"),
+  authorId: z.string().uuid("Penulis tidak valid"),
 });
 
 const AddNews = () => {
   const navigate = useNavigate();
+  const [previewImage, setPreviewImage] = useState(null);
 
   const { data: authors } = useQuery({
     queryKey: ["authors"],
     queryFn: userService.getAll,
   });
-
-  console.log("authors", authors);
 
   const {
     register,
@@ -42,7 +41,7 @@ const AddNews = () => {
   } = useForm({
     resolver: zodResolver(newsSchema),
     defaultValues: {
-      author_id: authors?.id,
+      authorId: authors?.id,
     },
   });
 
@@ -58,11 +57,27 @@ const AddNews = () => {
     const formData = new FormData();
     formData.append("title", values.title);
     formData.append("content", values.content);
-    formData.append("author_id", values.author_id);
+    formData.append("authorId", values.authorId);
     if (values.thumbnail?.[0]) {
       formData.append("thumbnail", values.thumbnail[0]);
     }
     mutation.mutate(formData);
+
+    console.log(values.thumbnail);
+  };
+
+  // 🔹 Event handler untuk preview
+  const handlePreview = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewImage(url);
+    }
+  };
+
+  // 🔹 Hapus preview
+  const removePreview = () => {
+    setPreviewImage(null);
   };
 
   return (
@@ -126,7 +141,7 @@ const AddNews = () => {
                 Penulis
               </label>
               <select
-                {...register("author_id")}
+                {...register("authorId")}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:ring-2 focus:ring-amber-500 outline-none"
               >
                 {authors?.map((a) => (
@@ -137,24 +152,45 @@ const AddNews = () => {
               </select>
             </div>
 
-            {/* Thumbnail Upload */}
+            {/* Thumbnail Upload + Preview */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">
                 Thumbnail (opsional)
               </label>
-              <div className="flex items-center justify-center w-full">
-                <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-800/50 hover:bg-slate-700/50 transition">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-slate-400">
-                    <Upload size={24} className="mb-2" />
-                    <p className="text-sm">Klik untuk memilih gambar</p>
-                  </div>
-                  <input
-                    type="file"
-                    {...register("thumbnail")}
-                    className="hidden"
+
+              {previewImage ? (
+                <div className="relative w-full">
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className="w-full max-h-64 object-contain rounded-lg border border-slate-700"
                   />
-                </label>
-              </div>
+                  <button
+                    type="button"
+                    onClick={removePreview}
+                    className="absolute top-2 right-2 bg-slate-900/80 hover:bg-slate-800 text-red-400 rounded-full p-1"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center w-full">
+                  <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-800/50 hover:bg-slate-700/50 transition">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-slate-400">
+                      <Upload size={24} className="mb-2" />
+                      <p className="text-sm">Klik untuk memilih gambar</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      {...register("thumbnail", {
+                        onChange: (e) => handlePreview(e),
+                      })}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
             </div>
 
             {/* Tombol Simpan */}

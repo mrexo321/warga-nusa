@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-const ParticipantTable = () => {
+const ParticipantTable = ({ data }) => {
+  console.log(data);
+
   const [participants, setParticipants] = useState([
     {
       id: 1,
