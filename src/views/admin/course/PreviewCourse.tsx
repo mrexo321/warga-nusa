@@ -87,7 +87,7 @@ const PreviewCourse = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedMeeting.attendances.map((attendant, key) => (
+                  {selectedMeeting.attendances?.map((attendant, key) => (
                     <tr className="border-t border-slate-700/50 hover:bg-slate-800/50 transition">
                       <td className="px-4 py-3 font-medium text-slate-100">
                         {attendant.user.name}
