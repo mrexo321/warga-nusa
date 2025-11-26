@@ -31,6 +31,8 @@ import AssignShift from "./views/admin/shift/AssignShift";
 import ProductDetail from "./components/ProductDetail";
 import TaskReport from "./pages/admin/TaskReport";
 import Patrol from "./pages/user/Patrol";
+import DetailPatrol from "./views/admin/patrol/DetailPatrol";
+import UserPatrol from "./views/user/patrol/UserPatrol";
 
 function App() {
   return (
@@ -49,6 +51,7 @@ function App() {
       <Route element={<ProtectedRoutes allowedRoles={["admin", "user"]} />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/patrol" element={<Patrol />} />
+        <Route path="/patrol/:id/detail" element={<DetailPatrol />} />
       </Route>
       <Route element={<ProtectedRoutes allowedRoles={["admin"]} />}>
         <Route path="/users" element={<ManagementUser />} />
@@ -71,6 +74,7 @@ function App() {
         <Route path="/shift-kehadiran" element={<ShiftKehadiran />} />
         <Route path="/course-satpam" element={<SecurityCourses />} />
         <Route path="/course-satpam/detail/:id" element={<DetailCourse />} />
+        <Route path="/user-patrol" element={<UserPatrol />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

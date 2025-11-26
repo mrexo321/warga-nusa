@@ -23,3 +23,73 @@
 .animate-scaleIn {
   animation: scaleIn 0.3s ease forwards;
 }
+
+/* Animation */
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Glass container */
+.glass-box {
+  background: rgba(25, 25, 25, 0.45);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 255, 150, 0.22);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+/* Scanner style */
+.scanner-container {
+  padding: 16px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  background: rgba(20, 20, 20, 0.4);
+  border: 1px solid rgba(0, 255, 130, 0.25);
+}
+
+.scanner-frame {
+  overflow: hidden;
+  border-radius: 12px;
+  border: 2px solid rgba(0, 255, 130, 0.35);
+}
+
+/* Buttons */
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #16a34a, #0d8a5c);
+  transition: 0.25s;
+}
+.btn-primary:hover {
+  opacity: 0.88;
+}
+
+.btn-secondary {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #374151;
+  font-size: 14px;
+}
+
+/* Textarea */
+.textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: rgba(10, 10, 10, 0.6);
+}
