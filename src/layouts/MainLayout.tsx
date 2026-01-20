@@ -32,6 +32,7 @@ const MainLayout = ({ children }) => {
     { path: "/courses", label: "Pelatihan", icon: Users },
     { path: "/news", label: "Berita", icon: Calendar },
     { path: "/gallery", label: "Galeri", icon: Users },
+    { path: "/patrol", label: "Manajemen Patroli", icon: Users },
     { path: "/task-report", label: "Laporan Penugasan", icon: Users },
   ];
 
@@ -39,6 +40,7 @@ const MainLayout = ({ children }) => {
     { path: "/dashboard", label: "Dashboard", icon: Home },
     { path: "/shift-kehadiran", label: "Shift", icon: Calendar },
     { path: "/course-satpam", label: "Kursus", icon: Users },
+    { path: "/user-patrol", label: "Patroli", icon: Users },
   ];
 
   const tabs = user.role === "admin" ? adminTabs : userTabs;

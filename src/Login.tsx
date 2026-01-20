@@ -52,7 +52,6 @@ const Login = () => {
   });
 
   const onSubmit = (data: ILogin) => loginMutation.mutate(data);
-
   const isDark = currentTheme === "dark";
 
   return (
